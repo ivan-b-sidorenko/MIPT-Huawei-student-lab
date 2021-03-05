@@ -40,11 +40,11 @@ Matrix Matrix_product_fast(const Matrix& lhs , const Matrix& rhs)
 
 	for (int i = 0 ; i < lhs_str ; ++i)
 	{
-		float* res = result[i];
+		int* res = result[i];
 		for (int j = 0 ; j < lhs_col ; ++j)
 		{
-			const float* row_rhs = rhs[j];
-			float per_lhs = lhs[i][j];
+			const int* row_rhs = rhs[j];
+			int per_lhs = lhs[i][j];
 
 			for (int k = 0 ; k < rhs_col ; ++k)
 				res[k] += row_rhs[k] * per_lhs;

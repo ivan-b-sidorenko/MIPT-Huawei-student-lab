@@ -8,7 +8,7 @@ class Matrix final
 private:
 	int num_col;
 	int num_str;
-	float** mrx;
+	int** mrx;
 public:
 	Matrix(int col , int str);
 	Matrix(int col , int str , int mod);
@@ -21,7 +21,7 @@ public:
 
 	Matrix& operator=(const Matrix& rhs);
 	bool operator==(const Matrix& rhs);
-	float* operator[](const int rhs) const {return mrx[rhs];};
+	int* operator[](const int rhs) const {return mrx[rhs];};
 	friend std::ostream& operator<<(std::ostream& out , const Matrix& rhs);
 	friend std::istream& operator>>(std::istream& in , Matrix& rhs);
 };
@@ -31,10 +31,10 @@ Matrix::Matrix(int str , int col)
 	num_col = col;
 	num_str = str;
 
-	mrx = new float*[str];
+	mrx = new int*[str];
 
 	for (int i = 0 ; i < str ; ++i)
-		mrx[i] = new float[col];
+		mrx[i] = new int[col];
 }
 
 Matrix::Matrix(int str , int col , int mod)
@@ -42,14 +42,14 @@ Matrix::Matrix(int str , int col , int mod)
 	num_str = str;
 	num_col = col;
 
-	mrx = new float*[num_str];
+	mrx = new int*[num_str];
 
 	for (int i = 0 ; i < num_str ; ++i)
-		mrx[i] = new float[col];
+		mrx[i] = new int[col];
 
 	for (int i = 0 ; i < num_str ; ++i)
 		for (int j = 0 ; j < num_col ; ++j)
-			mrx[i][j] = (double)rand() / RAND_MAX * 10;
+			mrx[i][j] = rand() % 10;
 }
 
 Matrix::Matrix(const Matrix& rhs)
@@ -57,10 +57,10 @@ Matrix::Matrix(const Matrix& rhs)
 	num_str = rhs.get_num_str();
 	num_col = rhs.get_num_col();
 
-	mrx = new float*[num_str];
+	mrx = new int*[num_str];
 
 	for (int i = 0 ; i < num_str ; ++i)
-		mrx[i] = new float[num_str];
+		mrx[i] = new int[num_str];
 
 	for (int i = 0 ; i < num_str ; i++)
 		for (int j = 0 ; j < num_col ; j++)
@@ -87,10 +87,10 @@ Matrix& Matrix::operator=(const Matrix& rhs)
 	if ((rhs.get_num_str() != num_str) || (rhs.get_num_col() != num_col))
 	{
 		cleanup();
-		mrx = new float*[rhs.get_num_str()];
+		mrx = new int*[rhs.get_num_str()];
 
 		for (int i = 0 ; i < rhs.get_num_col() ; ++i)
-			mrx[i] = new float[rhs.get_num_str()];
+			mrx[i] = new int[rhs.get_num_str()];
 
 		num_col = rhs.get_num_col();
 		num_str = rhs.get_num_str();
