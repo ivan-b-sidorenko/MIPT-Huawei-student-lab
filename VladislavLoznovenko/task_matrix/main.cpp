@@ -7,8 +7,8 @@ using namespace matrix;
 
 int main()
 {
-	Matrix test_1(10 , 5 , 0);
-	Matrix test_2(5 , 9 , 0);
+	Matrix test_1(100 , 50 , 0);
+	Matrix test_2(50 , 90 , 0);
 
 	/*std::cout << test_1 << std::endl;
 	std::cout << test_2 << std::endl;*/
