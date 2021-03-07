@@ -377,15 +377,11 @@ namespace MX
 
   template <typename DataT>
   size_t Matrix<DataT>::cols ( ) const noexcept
-  {
-    return cols_;
-  }
+  { return cols_; }
 
   template <typename DataT>
   size_t Matrix<DataT>::rows ( ) const noexcept
-  {
-    return rows_;
-  }
+  { return rows_; }
 
   template <typename DataT>
   long double Matrix<DataT>::det ( ) const
@@ -602,39 +598,27 @@ namespace MX
 
   template <typename DataT>
   bool Matrix<DataT>::sum_suitable (const Matrix<DataT> & matr) const
-  {
-    return (cols_ == matr.cols_) && (rows_ == matr.rows_);
-  }
+  { return (cols_ == matr.cols_) && (rows_ == matr.rows_); }
 
   template<typename DataT>
   Matrix<DataT> operator+ ( const Matrix<DataT> & lhs, const Matrix<DataT> & rhs )
-  {
-    return Matrix<DataT>{lhs} += rhs;
-  }
+  { return Matrix<DataT>{lhs} += rhs; }
 
   template<typename DataT>
   Matrix<DataT> operator- ( const Matrix<DataT> & lhs, const Matrix<DataT> & rhs )
-  {
-    return Matrix<DataT>{lhs} -= rhs;
-  }
+  { return Matrix<DataT>{lhs} -= rhs; }
 
   template<typename DataT>
   Matrix<DataT> operator* ( const Matrix<DataT> & lhs, const Matrix<DataT> & rhs )
-  {
-    return Matrix<DataT>{lhs} *= rhs;
-  }
+  { return Matrix<DataT>{lhs} *= rhs; }
 
   template<typename DataT>
   Matrix<DataT> operator* ( const Matrix<DataT> & matr, DataT mul )
-  {
-    return Matrix<DataT>{matr} *= mul;
-  }
+  { return Matrix<DataT>{matr} *= mul; }
 
   template<typename DataT>
   Matrix<DataT> operator* ( DataT mul, const Matrix<DataT> & matr )
-  {
-    return Matrix<DataT>{matr} *= mul;
-  }
+  { return Matrix<DataT>{matr} *= mul; }
 
   template<typename DataT>
   Matrix<DataT> transpose ( const Matrix<DataT> & matr )
