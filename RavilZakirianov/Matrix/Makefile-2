@@ -1,0 +1,2 @@
+all:
+	g++ main2.cpp -O0 -o speed
