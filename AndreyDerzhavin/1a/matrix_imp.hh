@@ -293,6 +293,7 @@ linal::Matrix<T> &linal::Matrix<T>::operator *=( const Matrix &matr )
 {
   assert(cols_ == matr.rows_);
 
+  /* Improved by transposing -> memory locality */
   Matrix<T> temp = Transposing();
 
   auto mul_func = [&]( int i, int j )
