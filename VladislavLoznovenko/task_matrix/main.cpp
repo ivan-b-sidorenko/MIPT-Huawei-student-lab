@@ -5,21 +5,21 @@ using namespace matrix;
 
 int main()
 {
-	Matrix test_1(100 , 50 , 0);
-	Matrix test_2(50 , 100 , 0);
+	Matrix<int> test_1(400 , 400 , 0);
+	Matrix<int> test_2(400 , 400 , 0);
 
-	/*std::cout << test_1 << std::endl;
-	std::cout << test_2 << std::endl;*/
+	auto t1 = std::chrono::high_resolution_clock::now();
+	Matrix<int> res = Matrix_product(test_1 , test_2);
+	auto t2 = std::chrono::high_resolution_clock::now();
+	uint64_t duration = std::chrono::duration_cast<std::chrono::milliseconds> (t2 - t1).count();
+	std::cout << "Normal product - " << duration << " - milliseconds" << std::endl;
 
-	auto t1 = std::chrono::system_clock::now();
-	Matrix res = Matrix_product(test_1 , test_2);
-	auto t2 = std::chrono::system_clock::now();
-	std::cout << "Normal product - " << (t2 - t1).count() << std::endl;
-
-	t1 = std::chrono::system_clock::now();
-	Matrix res_fast = Matrix_product_fast(test_1 , test_2);
-	t2 = std::chrono::system_clock::now();
-	std::cout << "Fast product - " << (t2 - t1).count() << std::endl;
+	auto t3 = std::chrono::high_resolution_clock::now();
+	Matrix<int> res_fast = Matrix_product_fast(test_1 , test_2);
+	auto t4 = std::chrono::high_resolution_clock::now();
+	duration = std::chrono::duration_cast<std::chrono::milliseconds> (t4 - t3).count();
+	std::cout << "Fast product   - " << duration << " - milliseconds" << std::endl;
 
 	return 0;
 }
+
