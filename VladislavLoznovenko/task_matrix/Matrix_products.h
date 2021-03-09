@@ -1,6 +1,7 @@
 using namespace matrix;
 
-Matrix Matrix_product(const Matrix& lhs , const Matrix& rhs)
+template <typename T>
+Matrix<T> Matrix_product(const Matrix<T>& lhs , const Matrix<T>& rhs)
 {
 	int lhs_col = lhs.get_num_col();
 	int lhs_str = lhs.get_num_str();
@@ -9,8 +10,8 @@ Matrix Matrix_product(const Matrix& lhs , const Matrix& rhs)
 
 	assert(lhs_col == rhs_str);
 
-	int sum = 0;
-	Matrix result(lhs_str , rhs_col);
+	T sum = 0;
+	Matrix<T> result(lhs_str , rhs_col);
 
 	for (int i = 0 ; i < lhs_str ; ++i)
 	{
@@ -26,9 +27,8 @@ Matrix Matrix_product(const Matrix& lhs , const Matrix& rhs)
 	return result;
 }
 
-typedef int v4i __attribute__ ((vector_size (16)));
-
-Matrix Matrix_product_fast(const Matrix& lhs , const Matrix& rhs)
+template <typename T>
+Matrix<T> Matrix_product_fast(const Matrix<T>& lhs , const Matrix<T>& rhs)
 {
 	int lhs_col = lhs.get_num_col();
 	int lhs_str = lhs.get_num_str();
@@ -36,36 +36,37 @@ Matrix Matrix_product_fast(const Matrix& lhs , const Matrix& rhs)
 	int rhs_str = rhs.get_num_str();
 
 	assert(lhs_col == rhs_str);
-
-	int sum = 0;
-	Matrix result(lhs_str , rhs_col);
+	//Create float Matrixs beacuse all (immintrin.h)'s functions are working with float
+	Matrix<float> lhs_per(lhs);
+	Matrix<float> rhs_per(rhs);
+	Matrix<float> result_per(lhs_str , rhs_col);
 
 	for (int i = 0 ; i < lhs_str ; ++i)
 	{
-		int* res = result[i];
+		float* res = result_per[i];
+		for (int k = 0 ; k < rhs_col / 8 ; k += 1)
+		{
+			_mm256_storeu_ps(res + k * 8 + 0 , _mm256_setzero_ps());
+		}
+
 		for (int j = 0 ; j < lhs_col ; ++j)
 		{
-			const int* row_rhs = rhs[j];
-			//Что-то типо векторизации
-			int per_lhs = lhs[i][j];
-			//выравниваем адрес
-			for (int k = 0 ; k < 2 ; ++k)
-				res[k] += row_rhs[k] * per_lhs;
+			const float* row_rhs = rhs_per[j];
+			float per_lhs = lhs_per[i][j];
+			__m256 a = _mm256_set1_ps(lhs_per[i][j]);
 
-			//объединяем данные
-			v4i* res_vec = (v4i*)(res);
-			v4i* row_rhs_vec = (v4i*)(row_rhs);
-
-			//складываем объединённые данные
-			for (int k = 2 ; k < (rhs_col - rhs_col % 4) / 4 ; ++k)
+			for (int k = 0 ; k < rhs_col / 16 ; k += 1)
 			{
-				res_vec[k] += row_rhs_vec[k] * per_lhs;
+				_mm256_storeu_ps(res + k * 8 + 0 , _mm256_add_ps(_mm256_mul_ps(a , _mm256_loadu_ps(row_rhs + k * 8 + 0)) , _mm256_loadu_ps(res + k * 8 + 0)));
+			    _mm256_storeu_ps(res + k * 8 + 8 , _mm256_add_ps(_mm256_add_ps(a , _mm256_loadu_ps(row_rhs + k + 8)) , _mm256_loadu_ps(res + k + 8)));
 			}
 
-			//складываем остатки
-			for (int k = (rhs_col - rhs_col % 4) ; k < rhs_col ; ++k)
+			for (int k = (rhs_col - rhs_col % 16) ; k < rhs_col ; ++k)
 				res[k] += row_rhs[k] * per_lhs;
 		}
 	}
+
+	Matrix<T> result(result_per);
+
 	return result;
 }
