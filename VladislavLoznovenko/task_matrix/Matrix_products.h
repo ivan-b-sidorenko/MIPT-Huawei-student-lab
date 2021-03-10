@@ -55,13 +55,15 @@ Matrix<T> Matrix_product_fast(const Matrix<T>& lhs , const Matrix<T>& rhs)
 			float per_lhs = lhs_per[i][j];
 			__m256 a = _mm256_set1_ps(lhs_per[i][j]);
 
-			for (int k = 0 ; k < rhs_col / 16 ; k += 1)
+			for (int k = 0 ; k < rhs_col / 32 ; k += 1)
 			{
-				_mm256_storeu_ps(res + k * 8 + 0 , _mm256_add_ps(_mm256_mul_ps(a , _mm256_loadu_ps(row_rhs + k * 8 + 0)) , _mm256_loadu_ps(res + k * 8 + 0)));
-			    _mm256_storeu_ps(res + k * 8 + 8 , _mm256_add_ps(_mm256_add_ps(a , _mm256_loadu_ps(row_rhs + k + 8)) , _mm256_loadu_ps(res + k + 8)));
+				_mm256_storeu_ps(res + k * 32 + 0 , _mm256_add_ps(_mm256_mul_ps(a , _mm256_loadu_ps(row_rhs + k * 32 + 0)) , _mm256_loadu_ps(res + k * 32 + 0)));
+			    _mm256_storeu_ps(res + k * 32 + 8 , _mm256_add_ps(_mm256_add_ps(a , _mm256_loadu_ps(row_rhs + k * 32 + 8)) , _mm256_loadu_ps(res + k * 32 + 8)));
+			    _mm256_storeu_ps(res + k * 32 + 16 , _mm256_add_ps(_mm256_mul_ps(a , _mm256_loadu_ps(row_rhs + k * 32 + 16)) , _mm256_loadu_ps(res + k * 32 + 16)));
+			    _mm256_storeu_ps(res + k * 32 + 24 , _mm256_add_ps(_mm256_mul_ps(a , _mm256_loadu_ps(row_rhs + k * 32 + 24)) , _mm256_loadu_ps(res + k * 32 + 24)));
 			}
 
-			for (int k = (rhs_col - rhs_col % 16) ; k < rhs_col ; ++k)
+			for (int k = (rhs_col - rhs_col % 32) ; k < rhs_col ; ++k)
 				res[k] += row_rhs[k] * per_lhs;
 		}
 	}
