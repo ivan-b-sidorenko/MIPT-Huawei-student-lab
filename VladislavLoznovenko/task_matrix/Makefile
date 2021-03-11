@@ -6,8 +6,8 @@ all: main
 main: main.o Matrix.o
 	@ $(CXX) Matrix.o main.o -o test
 
-Matrix.o: Matrix.cpp
-	@ $(CXX) Matrix.cpp $(CXXFLAGS)
+Matrix.o: Matrix_lib/Matrix.cpp
+	@ $(CXX) Matrix_lib/Matrix.cpp $(CXXFLAGS)
 
 main.o: main.cpp
 	@ $(CXX) main.cpp $(CXXFLAGS)

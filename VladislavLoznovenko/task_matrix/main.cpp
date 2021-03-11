@@ -1,4 +1,4 @@
-#include "Matrix.h"
+#include "Matrix_lib/Matrix.h"
 #include "Matrix_products.h"
 
 #define RES_STR 501
