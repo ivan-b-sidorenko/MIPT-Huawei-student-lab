@@ -125,7 +125,7 @@ namespace linear {
                 result.arr[i][j] = c;
             }
         }
-        //result.print();
+        result.print();
         return true;
         
     }
