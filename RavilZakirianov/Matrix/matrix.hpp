@@ -3,7 +3,6 @@
 #include <cstdlib> // для функций rand() и srand()
 #include <ctime> // для функции time()
 #include <chrono>
-#include <immintrin.h>
 #include <thread>
 #include <vector>
 
@@ -17,7 +16,9 @@ namespace linear {
             Matrix(int _row, int _col);
             Matrix(int _row, int _col, int** _arr);
             Matrix(Matrix& A);
-            bool operator*(Matrix& right);
+            Matrix(Matrix& A, int a);               //it is constructor first version
+            bool operator*(Matrix& right) const;
+            bool operator+(Matrix& right) const;          //it is mul first version
             void print() const;
             ~Matrix();
     };
@@ -55,7 +56,9 @@ namespace linear {
         //for(int i = 0; i < row; ++i) {
         //   for(int j = 0; j < col; ++j) {
         for(int j = 0; j < col; ++j) {
-            for(int i = 7; i < row; i += 8) {
+            int i = 7;
+            //for(i = 7; i < row; i += 8) {
+            while( i < row ) {
                 arr[i-7][j] = A.arr[i-7][j];
                 arr[i-6][j] = A.arr[i-6][j];
                 arr[i-5][j] = A.arr[i-5][j];
@@ -64,11 +67,32 @@ namespace linear {
                 arr[i-2][j] = A.arr[i-2][j];
                 arr[i-1][j] = A.arr[i-1][j];
                 arr[i][j] = A.arr[i][j];
+                i += 8;
             }
-            if ( row < 8 ) {
-                for(int i = 0; i < row; ++i) {
-                    arr[i][j] = A.arr[i][j];
+            i -= 8;
+            if ( row < 8 ) {                      //ch                              
+                for(int it = 0; it < row; ++it) {
+                    arr[it][j] = A.arr[it][j];
                 }
+            }
+            else if ( row % 8 != 0 ) {
+                for(int it = i + 1; it < row; ++it) {
+                    arr[it][j] = A.arr[it][j];
+                }
+            }
+        }
+    }
+
+    Matrix::Matrix(Matrix& A, int aa) {
+        row = A.row;
+        col = A.col;
+        arr = new int*[row];
+        for(int i = 0; i < row; ++i) {
+            arr[i] = new int[col];
+        }
+        for(int i = 0; i < row; ++i) {
+            for(int j = 0; j < col; ++j) {
+                arr[i][j] = A.arr[i][j];
             }
         }
     }
@@ -88,7 +112,7 @@ namespace linear {
         }
     }
 
-    bool Matrix::operator*(Matrix& right) {              // Matrix C = A * B;
+    bool Matrix::operator*(Matrix& right) const {              // Matrix C = A * B;
         if ( col != right.row ) {
             std::cout << "WRONG! Incorrect matrix dimensions are set\n";
             return false;
@@ -107,7 +131,8 @@ namespace linear {
             num++;
             for(int i = 0; i < M; ++i) {            //ускорение перестановкой циклов, вынос переменных
                 c = 0;
-                for(int k = 7; k < col; k += 8) {   //loop unrolling
+                int k = 7;
+                while ( k < col ) {                 //loop unrolling
                     c += arr[i][k-7] * Y[k-7];
                     c += arr[i][k-6] * Y[k-6];
                     c += arr[i][k-5] * Y[k-5];
@@ -116,18 +141,42 @@ namespace linear {
                     c += arr[i][k-2] * Y[k-2];
                     c += arr[i][k-1] * Y[k-1];
                     c += arr[i][k] * Y[k];
+                    k += 8;
                 }
-                if ( col < 8 ) {
-                    for(int k = 0; k < col; ++k) {
-                        c += arr[i][k] * Y[k];
+                k -= 8;
+                if ( col < 8 ) {                                              //ch
+                    for(int ik = 0; ik < col; ++ik) {
+                        c += arr[i][ik] * Y[ik];
+                    }
+                }
+                else if ( col % 8 != 0 ) {
+                    for(int ik = k + 1; ik < col; ++ik) {
+                        c += arr[i][ik] * Y[ik];
                     }
                 }
                 result.arr[i][j] = c;
             }
         }
-        result.print();
+        //result.print();
         return true;
         
+    }
+
+    bool Matrix::operator+(Matrix& right) const {              // Matrix C = A * B;
+        if ( col != right.row ) {
+            std::cout << "WRONG! Incorrect matrix dimensions are set\n";
+            return false;
+        }
+        Matrix result(row, right.col);
+        for(int i = 0; i < result.row; ++i) {
+            for(int j = 0; j < result.col; ++j) {
+                for(int k = 0; k < col; ++k) {
+                    result.arr[i][j] += (arr[i][k] * right.arr[k][j]);
+                }
+            }
+        }
+        //result.print();
+        return true;
     }
 }
 
