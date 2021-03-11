@@ -1,7 +1,6 @@
 using namespace matrix;
 
-template <typename T>
-void Matrix_product(const Matrix<T>& lhs , const Matrix<T>& rhs , Matrix<T>& result)
+void Matrix_product(const Matrix& lhs , const Matrix& rhs , Matrix& result)
 {
 	int lhs_col = lhs.get_num_col();
 	int lhs_str = lhs.get_num_str();
@@ -10,7 +9,7 @@ void Matrix_product(const Matrix<T>& lhs , const Matrix<T>& rhs , Matrix<T>& res
 
 	assert(lhs_col == rhs_str);
 
-	T sum = 0;
+	int sum = 0;
 
 	for (int i = 0 ; i < lhs_str ; ++i)
 	{
@@ -24,8 +23,7 @@ void Matrix_product(const Matrix<T>& lhs , const Matrix<T>& rhs , Matrix<T>& res
 	};
 }
 
-template <typename T>
-void Matrix_product_fast(const Matrix<T>& lhs , const Matrix<T>& rhs , Matrix<T>& result)
+void Matrix_product_fast(const Matrix& lhs , const Matrix& rhs , Matrix& result)
 {
 	int lhs_col = lhs.get_num_col();
 	int lhs_str = lhs.get_num_str();
@@ -33,38 +31,32 @@ void Matrix_product_fast(const Matrix<T>& lhs , const Matrix<T>& rhs , Matrix<T>
 	int rhs_str = rhs.get_num_str();
 
 	assert(lhs_col == rhs_str);
-	//Create float Matrixs beacuse all (immintrin.h)'s functions are working with float
-	Matrix<float> lhs_per(lhs);
-	Matrix<float> rhs_per(rhs);
-	Matrix<float> result_per(lhs_str , rhs_col);
 
 	for (int i = 0 ; i < lhs_str ; ++i)
 	{
-		float* res = result_per[i];
-		for (int k = 0 ; k < rhs_col / 8 ; k += 1)
+		__m256i* res = (__m256i*)result[i];
+		/*for (int k = 0 ; k < rhs_col / 8 ; k += 1)
 		{
-			_mm256_storeu_ps(res + k * 8 + 0 , _mm256_setzero_ps());
-		}
+			_mm256_storeu_si256(res + k , _mm256_setzero_si256());
+		}*/
 
 		for (int j = 0 ; j < lhs_col ; ++j)
 		{
-			const float* row_rhs = rhs_per[j];
-			float per_lhs = lhs_per[i][j];
-			__m256 a = _mm256_set1_ps(lhs_per[i][j]);
+			const __m256i* row_rhs = (__m256i*)rhs[j];
+			int per_lhs = lhs[i][j];
+			__m256i a = _mm256_set1_epi32(lhs[i][j]);
 
 			for (int k = 0 ; k < rhs_col / 32 ; k += 1)
 			{
-				_mm256_storeu_ps(res + k * 32 + 0 , _mm256_fmadd_ps(a , _mm256_loadu_ps(row_rhs + k * 32 + 0) , _mm256_loadu_ps(res + k * 32 + 0)));
-			    _mm256_storeu_ps(res + k * 32 + 8 , _mm256_fmadd_ps(a , _mm256_loadu_ps(row_rhs + k * 32 + 8) , _mm256_loadu_ps(res + k * 32 + 8)));
-			    _mm256_storeu_ps(res + k * 32 + 16 , _mm256_fmadd_ps(a , _mm256_loadu_ps(row_rhs + k * 32 + 16) , _mm256_loadu_ps(res + k * 32 + 16)));
-			    _mm256_storeu_ps(res + k * 32 + 24 , _mm256_fmadd_ps(a , _mm256_loadu_ps(row_rhs + k * 32 + 24) , _mm256_loadu_ps(res + k * 32 + 24)));
+				_mm256_storeu_si256(res + k * 4 + 0 , _mm256_add_epi32(_mm256_mullo_epi32(a , _mm256_loadu_si256(row_rhs + k * 4 + 0)) , _mm256_loadu_si256(res + k * 4 + 0)));
+				_mm256_storeu_si256(res + k * 4 + 1 , _mm256_add_epi32(_mm256_mullo_epi32(a , _mm256_loadu_si256(row_rhs + k * 4 + 1)) , _mm256_loadu_si256(res + k * 4 + 1)));
+				_mm256_storeu_si256(res + k * 4 + 2 , _mm256_add_epi32(_mm256_mullo_epi32(a , _mm256_loadu_si256(row_rhs + k * 4 + 2)) , _mm256_loadu_si256(res + k * 4 + 2)));
+				_mm256_storeu_si256(res + k * 4 + 3 , _mm256_add_epi32(_mm256_mullo_epi32(a , _mm256_loadu_si256(row_rhs + k * 4 + 3)) , _mm256_loadu_si256(res + k * 4 + 3)));
+
 			}
 
 			for (int k = (rhs_col - rhs_col % 32) ; k < rhs_col ; ++k)
-				res[k] += row_rhs[k] * per_lhs;
+				result[i][k] += rhs[j][k] * per_lhs;
 		}
 	}
-
-	Matrix<T> result_l(result_per);
-	result = result_l;
 }
