@@ -1,7 +1,7 @@
 using namespace matrix;
 
 template <typename T>
-Matrix<T> Matrix_product(const Matrix<T>& lhs , const Matrix<T>& rhs)
+void Matrix_product(const Matrix<T>& lhs , const Matrix<T>& rhs , Matrix<T>& result)
 {
 	int lhs_col = lhs.get_num_col();
 	int lhs_str = lhs.get_num_str();
@@ -11,7 +11,6 @@ Matrix<T> Matrix_product(const Matrix<T>& lhs , const Matrix<T>& rhs)
 	assert(lhs_col == rhs_str);
 
 	T sum = 0;
-	Matrix<T> result(lhs_str , rhs_col);
 
 	for (int i = 0 ; i < lhs_str ; ++i)
 	{
@@ -23,12 +22,10 @@ Matrix<T> Matrix_product(const Matrix<T>& lhs , const Matrix<T>& rhs)
 			sum = 0;
 		};
 	};
-
-	return result;
 }
 
 template <typename T>
-Matrix<T> Matrix_product_fast(const Matrix<T>& lhs , const Matrix<T>& rhs)
+void Matrix_product_fast(const Matrix<T>& lhs , const Matrix<T>& rhs , Matrix<T>& result)
 {
 	int lhs_col = lhs.get_num_col();
 	int lhs_str = lhs.get_num_str();
@@ -57,10 +54,10 @@ Matrix<T> Matrix_product_fast(const Matrix<T>& lhs , const Matrix<T>& rhs)
 
 			for (int k = 0 ; k < rhs_col / 32 ; k += 1)
 			{
-				_mm256_storeu_ps(res + k * 32 + 0 , _mm256_add_ps(_mm256_mul_ps(a , _mm256_loadu_ps(row_rhs + k * 32 + 0)) , _mm256_loadu_ps(res + k * 32 + 0)));
-			    _mm256_storeu_ps(res + k * 32 + 8 , _mm256_add_ps(_mm256_add_ps(a , _mm256_loadu_ps(row_rhs + k * 32 + 8)) , _mm256_loadu_ps(res + k * 32 + 8)));
-			    _mm256_storeu_ps(res + k * 32 + 16 , _mm256_add_ps(_mm256_mul_ps(a , _mm256_loadu_ps(row_rhs + k * 32 + 16)) , _mm256_loadu_ps(res + k * 32 + 16)));
-			    _mm256_storeu_ps(res + k * 32 + 24 , _mm256_add_ps(_mm256_mul_ps(a , _mm256_loadu_ps(row_rhs + k * 32 + 24)) , _mm256_loadu_ps(res + k * 32 + 24)));
+				_mm256_storeu_ps(res + k * 32 + 0 , _mm256_fmadd_ps(a , _mm256_loadu_ps(row_rhs + k * 32 + 0) , _mm256_loadu_ps(res + k * 32 + 0)));
+			    _mm256_storeu_ps(res + k * 32 + 8 , _mm256_fmadd_ps(a , _mm256_loadu_ps(row_rhs + k * 32 + 8) , _mm256_loadu_ps(res + k * 32 + 8)));
+			    _mm256_storeu_ps(res + k * 32 + 16 , _mm256_fmadd_ps(a , _mm256_loadu_ps(row_rhs + k * 32 + 16) , _mm256_loadu_ps(res + k * 32 + 16)));
+			    _mm256_storeu_ps(res + k * 32 + 24 , _mm256_fmadd_ps(a , _mm256_loadu_ps(row_rhs + k * 32 + 24) , _mm256_loadu_ps(res + k * 32 + 24)));
 			}
 
 			for (int k = (rhs_col - rhs_col % 32) ; k < rhs_col ; ++k)
@@ -68,7 +65,6 @@ Matrix<T> Matrix_product_fast(const Matrix<T>& lhs , const Matrix<T>& rhs)
 		}
 	}
 
-	Matrix<T> result(result_per);
-
-	return result;
+	Matrix<T> result_l(result_per);
+	result = result_l;
 }
