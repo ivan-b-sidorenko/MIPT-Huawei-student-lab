@@ -1,4 +1,4 @@
-using namespace matrix;
+namespace matrix{
 
 void Matrix_product(const Matrix& lhs , const Matrix& rhs , Matrix& result)
 {
@@ -58,3 +58,5 @@ void Matrix_product_fast(const Matrix& lhs , const Matrix& rhs , Matrix& result)
 		}
 	}
 }
+
+};
