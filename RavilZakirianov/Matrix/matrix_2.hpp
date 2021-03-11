@@ -4,6 +4,8 @@
 #include <ctime> // для функции time()
 #include <chrono>
 #include <immintrin.h>
+#include <thread>
+#include <vector>
 
 namespace linear {
     class Matrix {
@@ -123,8 +125,9 @@ namespace linear {
                 result.arr[i][j] = c;
             }
         }
-        //result.print();
+        result.print();
         return true;
         
     }
 }
+
