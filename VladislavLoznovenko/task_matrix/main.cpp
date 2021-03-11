@@ -32,8 +32,6 @@ int main()
 		duration_fast += std::chrono::duration_cast<std::chrono::milliseconds> (t4 - t3).count();
 
 		assert(res_normal == res_fast);
-		res_normal.set_zero();
-		res_fast.set_zero();
 	}
 
 	std::cout << "Normal product - " << duration_normal / 5 << " - milliseconds" << std::endl;

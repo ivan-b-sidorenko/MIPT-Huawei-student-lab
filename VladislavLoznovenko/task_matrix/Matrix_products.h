@@ -2,6 +2,7 @@ using namespace matrix;
 
 void Matrix_product(const Matrix& lhs , const Matrix& rhs , Matrix& result)
 {
+	result.set_zero();
 	int lhs_col = lhs.get_num_col();
 	int lhs_str = lhs.get_num_str();
 	int rhs_col = rhs.get_num_col();
@@ -25,6 +26,7 @@ void Matrix_product(const Matrix& lhs , const Matrix& rhs , Matrix& result)
 
 void Matrix_product_fast(const Matrix& lhs , const Matrix& rhs , Matrix& result)
 {
+	result.set_zero();
 	int lhs_col = lhs.get_num_col();
 	int lhs_str = lhs.get_num_str();
 	int rhs_col = rhs.get_num_col();
@@ -35,10 +37,6 @@ void Matrix_product_fast(const Matrix& lhs , const Matrix& rhs , Matrix& result)
 	for (int i = 0 ; i < lhs_str ; ++i)
 	{
 		__m256i* res = (__m256i*)result[i];
-		/*for (int k = 0 ; k < rhs_col / 8 ; k += 1)
-		{
-			_mm256_storeu_si256(res + k , _mm256_setzero_si256());
-		}*/
 
 		for (int j = 0 ; j < lhs_col ; ++j)
 		{
