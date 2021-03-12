@@ -28,34 +28,22 @@ auto speed_test( const Matrix<double> & m1, const Matrix<double> & m2, Func func
     auto time = static_cast<double>(std::clock() - start) /
                 static_cast<double>(CLOCKS_PER_SEC);
 
-    res.transpose();
+    cout << time << endl;
 
-    return time;
+    return res;
 }
 
-int main( int ac, char ** av )
+int main( )
 {
-    /*if (ac != 2)
-    {
-        usage();
-        return 0;
-    }*/
+    uint rows1{}, rows2{},
+         cols1{}, cols2{};
 
-    int flag = atoi(av[1]);
+    cin >> rows1 >> cols1 >> rows2 >> cols2;
 
-    //std::clock_t start;
-    //double duration;
+    vector<double> raw1{}, raw2{};
 
-    uint rows1{}, rows2{};
-    uint cols1{}, cols2{};
-
-    cin >> rows1 >> cols1;
-
-    cin >> rows2 >> cols2;
-
-    vector<double> raw1{};
-    vector<double> raw2{};
-
+    raw1.reserve(rows1 * cols1);
+    
     for (int i = 0, end = rows1 * cols1; i < end; ++i)
     {
         double tmp;
@@ -63,6 +51,7 @@ int main( int ac, char ** av )
         raw1.push_back(tmp);
     }
 
+    raw2.reserve(rows2 * cols2);
     for (int i = 0, end = rows2 * cols2; i < end; ++i)
     {
         double tmp;
@@ -76,30 +65,10 @@ int main( int ac, char ** av )
     assert(cols1 == rows2);
     Matrix<long double> res{rows1, cols2};
 
+    vector<Func> functions{MUL::trivial, MUL::transpose};
 
-
-    /*switch (flag)
-    {
-        case 0:
-            start = std::clock();
-            res = trivial(m1, m2);
-            duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-            cout << "no tr: " << duration << endl;
-            break;
-        case 1:
-            start = std::clock();
-            res = transpose(m1, m2);
-            duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-            cout << "tr: " << duration << endl;
-            break;
-        default:
-            usage();
-            break;
-    }*/
-
-    vector<Func> f{MUL::trivial};
-
-    cout << speed_test(m1, m2, MUL::trivial) << endl;
+    for (auto && func : functions)
+        speed_test(m1, m2, func);
 
     return 0;
 }

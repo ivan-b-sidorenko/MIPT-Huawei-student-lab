@@ -1,7 +1,7 @@
 BLD = .m_build
 MST = mul_speed_tst
 
-CC = g++ --std=c++2a -Wall -Wextra
+CC = g++ --std=c++2a -Wall -Wextra -O0
 
 all: tst
 
