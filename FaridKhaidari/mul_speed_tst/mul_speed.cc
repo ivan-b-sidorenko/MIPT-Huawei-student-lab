@@ -22,13 +22,16 @@ using Func = Matrix<double> (*) (const Matrix<double> &, const Matrix<double> &)
 
 auto speed_test( const Matrix<double> & m1, const Matrix<double> & m2, Func func )
 {
+    static uint counter = 0;
+
+    cout << "Algo" << counter++ << ":" << endl;
     auto start = std::clock();
 
     Matrix<double> res = (*func)(m1, m2);
     auto time = static_cast<double>(std::clock() - start) /
                 static_cast<double>(CLOCKS_PER_SEC);
 
-    cout << time << endl;
+    cout << time << " seconds" << endl;
 
     return res;
 }
