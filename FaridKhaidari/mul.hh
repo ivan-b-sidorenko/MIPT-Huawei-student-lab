@@ -36,7 +36,7 @@ namespace MUL
         for (uint i = 0; i < lhs_r; ++i)
             for (uint j = 0; j < rhs_c; ++j)
                 for (uint k = 0; k < lhs_c; ++k)
-                    tmp1.set(i, j, lhs[i][k] * rhs[j][k]);
+                    tmp1.set(i, j, lhs[i][k] * rhs[k][j]);
 
         return tmp1;
     }
