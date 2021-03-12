@@ -2,12 +2,10 @@
 
 #include "matrix.h"
 
-matrix Naive_mult(const matrix& lhs , const matrix& rhs)
+void Naive_mult(const matrix& lhs , const matrix& rhs, matrix& result)
 {
 
 	assert(lhs.num_col == rhs.num_str);
-		
-	matrix result(lhs.num_str , rhs.num_col);
 
 	for (int i = 0; i < lhs.num_str; i++)
 	{
@@ -19,16 +17,13 @@ matrix Naive_mult(const matrix& lhs , const matrix& rhs)
 		};
 	};
 
-	return result;
 }
 
 
-matrix Modified_mult(const matrix& lhs , const matrix& rhs)
+void Modified_mult(const matrix& lhs , const matrix& rhs, matrix& result1)
 {
 
         assert(lhs.num_col == rhs.num_str);
-
-        matrix result1(lhs.num_str , rhs.num_col);
 
 	int ost = lhs.num_col % 6;
 	int block = 6;
@@ -93,5 +88,4 @@ matrix Modified_mult(const matrix& lhs , const matrix& rhs)
                 }
 	 }
 
-        return result1;
 }
