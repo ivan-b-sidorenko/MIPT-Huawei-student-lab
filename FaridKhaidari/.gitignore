@@ -1,1 +1,10 @@
 .m_build/
+
+../.idea/
+../.vscode/
+build/
+
+*.xml
+../*.xml
+
+cmake*
