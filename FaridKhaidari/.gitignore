@@ -4,6 +4,8 @@
 ../.vscode/
 .idea/
 .vscode/
+
+cmake-build-debug/
 build/
 
 *.xml
