@@ -22,11 +22,12 @@ void Naive_mult(const matrix& lhs , const matrix& rhs, matrix& result)
 
 void Modified_mult(const matrix& lhs , const matrix& rhs, matrix& result1)
 {
-
         assert(lhs.num_col == rhs.num_str);
 
 	int ost = lhs.num_col % 6;
-	int block = 6;
+	const int block = 6;
+	const int reg = 8;
+
 	if (lhs.num_col < 5){
 		for (int i = 0; i < rhs.num_col; i++){
 			int res[lhs.num_col];
@@ -52,39 +53,37 @@ void Modified_mult(const matrix& lhs , const matrix& rhs, matrix& result1)
 	}
 
 	else{
-        	for (int i = 0; i < rhs.num_col; i++){
+        	for (int i = 0; i < lhs.num_str; i++){
 			
-			int res[lhs.num_col];
+			__m256i* _cache = (__m256i*)(result1[i]);
 
-			for (int t = 0; t < lhs.num_col; t++){
-	
-				res[t] = rhs[t][i];	
-			}
+                	for (int j = 0; j < lhs.num_col; j++){
 
+				const __m256i* _rhs = (__m256i*)(rhs[j]);
+				const __m256i temp = _mm256_set1_epi32(lhs[i][j]);
 
-                	for (int j = 0; j < lhs.num_str; j++){
-
-				int cache = 0;
-				const int* temp = lhs[j];
-				int k = block - 1;
-
-				for (; k < lhs.num_col; k += block){
-					cache += temp[k] * res[k];
-					cache += temp[k - 1] * res[k - 1];
-					cache += temp[k - 2] * res[k - 2];
-					cache += temp[k - 3] * res[k - 3];
-					cache += temp[k - 4] * res[k - 4];
-					cache += temp[k - 5] * res[k - 5];
-				}		
-
-				for(int t = k - block + 1; t < k + ost - block + 1; t++){
-					cache += temp[t] * res[t]; // aligning
+				for (int k = 0; k < rhs.num_col / 8; k++){
+								
+					__m256i mull = _mm256_mullo_epi32(temp , _mm256_loadu_si256(&_rhs[k]));	
+					_mm256_storeu_si256(&_cache[k], _mm256_add_epi32( mull, _mm256_loadu_si256(&_cache[k])));					
+					/*cache[k] = cache[k] + res[k] * temp
+					 *
+					__m256i integer_vector = _mm256_loadu_si256(&cache[k]);
+					__m256i integer_row = _mm256_loadu_si256(&_rhs[k]);
+					__m256i mull = _mm256_mullo_epi32(temp, integer_row);
+					__m256i sum = _mm256_add_epi32(integer_vector, mull);
+					_mm256_storeu_si256(&cache[k], sum); 
+					*/
 				}
+			
 
-				result1[j][i] = cache;
+				for (int t = rhs.num_col - rhs.num_col % 8; t < rhs.num_col; t++){
+					result1[i][t] += rhs[j][t] * lhs[i][j];
+				}
 			}
+		}
+	}
 
-                }
-	 }
 
 }
+
