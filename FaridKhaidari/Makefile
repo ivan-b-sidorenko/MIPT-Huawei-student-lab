@@ -1,5 +1,4 @@
 BLD = .m_build
-MST = mul_speed_tst
 
 CC = g++ --std=c++2a -Wall -Wextra -O0
 
@@ -7,14 +6,14 @@ all: tst
 
 start: bld_dir
 
-tst: bld_dir mul_speed.o
-	$(CC) -o speed.exe $(BLD)/mul_speed.o
+tst: bld_dir main.o
+	$(CC) -o speed.exe $(BLD)/main.o
 
 bld_dir:
 	mkdir -p $(BLD)
 
-mul_speed.o: $(MST)/mul_speed.cc
-	$(CC) -c -o $(BLD)/mul_speed.o $(MST)/mul_speed.cc
+main.o: main.cc
+	$(CC) -c -o $(BLD)/main.o main.cc
 
 clean:
 	rm -rf $(BLD)
