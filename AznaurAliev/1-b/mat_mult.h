@@ -28,7 +28,6 @@ void Modified_mult(const matrix& lhs , const matrix& rhs, matrix& result1)
 	int ost = lhs.num_col % 6;
 	int block = 6;
 	if (lhs.num_col < 5){
-		int res[lhs.num_col];
 		for (int i = 0; i < rhs.num_col; i++){
 			int res[lhs.num_col];
 
