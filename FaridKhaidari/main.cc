@@ -10,12 +10,6 @@ using std::cout;
 using std::endl;
 using std::vector;
 
-void usage( )
-{
-    std::cerr << "USAGE: ./PROGNAME [ALGNUM]" << endl;
-    std::cerr << "0 - trivial, 1 - transpose" << endl;
-}
-
 using namespace MX;
 
 using Func = Matrix<double> (*) (const Matrix<double> &, const Matrix<double> &);
