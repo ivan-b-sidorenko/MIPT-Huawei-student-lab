@@ -12,5 +12,7 @@ theory/
 *.xml
 ../*.xml
 
+*.exe
+
 # CMakeLists.txt
 # cmake*
