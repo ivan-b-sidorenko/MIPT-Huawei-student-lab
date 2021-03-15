@@ -4,8 +4,8 @@
 
 int main()
 {
-	matrix mat_1(300, 12 , true);
-	matrix mat_2(12, 500, true);
+	matrix mat_1(300, 150, true);
+	matrix mat_2(150, 500, true);
 
 	matrix simple(300, 500);
 	matrix modified(300, 500);
