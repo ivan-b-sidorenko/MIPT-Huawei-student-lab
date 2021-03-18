@@ -1,5 +1,8 @@
 #include <vector>
+
+#include <mutex>
 #include <thread>
+
 #include <typeinfo>
 #include <stdexcept>
 
@@ -180,13 +183,17 @@ namespace MUL
         size_t NN = lhs_r / THREADS_NUM + 1;
 
         Matrix<DataT> tmp{lhs_r, rhs_c};
-
+        std::mutex mx_mx;
         auto f = [&](size_t c)
         {
+            mx_mx.lock();
             for (size_t m = c * NN, end = std::min((c + 1)  * NN, lhs_r); m < end; ++m)
+            {
                 for (size_t j = 0; j < rhs_c; ++j)
                     for (size_t k = 0; k < lhs_c; ++k)
                         tmp.set(m, j, tmp[m][j] + lhs[m][k] * rhs[k][j]);
+            }
+            mx_mx.unlock();
         };
 
         for (size_t i = 0; i < THREADS_NUM; ++i)
