@@ -1,5 +1,6 @@
 #include <cmath>
 #include <cassert>
+#include <iomanip>
 #include <utility>
 #include <iostream>
 #include <stdexcept>
@@ -542,7 +543,7 @@ namespace MX
 
     for (size_t i = 0; i < rows_; ++i)
       for (size_t j = 0; j < cols_; ++j)
-        if (arr_[i][j] != matr.data_[i][j])
+        if (arr_[i][j] != matr.arr_[i][j])
           return false;
 
     return true;
@@ -627,4 +628,31 @@ namespace MX
     tmp.transpose();
     return tmp;
   }
+
+    template <typename DataT> std::ostream &operator<<(std::ostream &ost, const Matrix<DataT> &matr)
+    {
+        ost << "   | ";
+        for (size_t i = 0, cols = matr.cols(); i < cols; ++i)
+            ost << std::setw(4) << i;
+
+        ost << std::endl;
+
+        ost << "   +-";
+        for (size_t i = 0, cols = matr.cols(); i < cols; ++i)
+            ost << "----";
+
+        ost << std::endl;
+
+        for (size_t i = 0, cols = matr.cols(), rows = matr.rows(); i < rows; ++i)
+        {
+            ost << std::setw(3) << i << "| ";
+
+            for (size_t j = 0; j < cols; ++j)
+                ost << std::setw(4) << matr[i][j] << ";";
+
+            ost << "|" << std::endl;
+        }
+
+        return ost;
+    }
 }
