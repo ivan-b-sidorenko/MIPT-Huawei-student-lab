@@ -15,4 +15,6 @@ theory/
 *.exe
 
 # CMakeLists.txt
-# cmake*
+cmake*
+
+callgrind*

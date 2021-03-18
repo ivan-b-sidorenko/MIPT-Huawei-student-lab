@@ -14,16 +14,22 @@ using namespace MX;
 
 using Func = Matrix<double> (*) (const Matrix<double> &, const Matrix<double> &);
 
-auto speed_test( const Matrix<double> & m1, const Matrix<double> & m2, Func func )
+auto speed_test( const Matrix<double> & m1,
+                 const Matrix<double> & m2,
+                 const Matrix<double> & mul,
+                 Func func )
 {
     static uint counter = 0;
 
-    cout << "Algo" << counter++ << ":" << endl;
+    cout << "Algo" << counter++ << ": ";
     auto start = std::clock();
 
     Matrix<double> res = (*func)(m1, m2);
     auto time = static_cast<double>(std::clock() - start) /
                 static_cast<double>(CLOCKS_PER_SEC) * 1000;
+
+    if (mul != res)
+        cout << "INCORRECT" << endl;
 
     cout << time << " milliseconds" << endl << endl;
 
@@ -72,10 +78,13 @@ int main( )
                            MUL::transpose_cycle4x,
 
                            MUL::trivial_cycle8x,
-                           MUL::transpose_cycle8x};
+                           MUL::transpose_cycle8x,
+                           
+                           MUL::trivial_threads};
 
+    auto mul = m1 * m2;
     for (auto && func : functions)
-        speed_test(m1, m2, func);
+        speed_test(m1, m2, mul, func);
 
     return 0;
 }
