@@ -235,8 +235,6 @@ namespace MX
     void set (size_t row, size_t col, DataT val);
     const Row<DataT> & operator[] (size_t row) const;
 
-    long double det( ) const;
-
     Matrix & transpose ( ) &;
 
     Matrix operator- ( ) const;
@@ -250,10 +248,6 @@ namespace MX
 
     bool operator== ( const Matrix & matr ) const;
     bool operator!= ( const Matrix & matr ) const;
-
-    bool swap_lines ( size_t l1, size_t l2 );
-    bool add_line ( size_t to, size_t from, DataT mul );
-    bool mul_line ( size_t l, DataT mul );
 
     bool sum_suitable ( const Matrix<DataT> & matr ) const;
   };
@@ -350,10 +344,8 @@ namespace MX
   {
     if (row >= rows_)
       throw std::out_of_range("Row index too big.");
-    else if (col >= cols_)
-      throw std::out_of_range("Column index too big.");
 
-    return arr_[row].get(col);
+    return arr_[row][col];
   }
 
   template <typename DataT>
@@ -383,58 +375,6 @@ namespace MX
   template <typename DataT>
   size_t Matrix<DataT>::rows ( ) const noexcept
   { return rows_; }
-
-  template <typename DataT>
-  long double Matrix<DataT>::det ( ) const
-  {
-    if (!std::is_fundamental<DataT>::value)
-      throw std::bad_typeid();
-
-    if ((cols_ != rows_))
-      throw std::range_error("Matrix should be square.");
-
-    long double sign = 1;
-
-    Matrix<long double> tmp_dbl{rows_, cols_};
-    for (size_t i = 0; i < rows_; ++i)
-      for (size_t j = 0; j < cols_; ++j)
-        tmp_dbl.set(i, j, static_cast<long double>(arr_[i][j]));
-
-    for (size_t i = 0; i < cols_; ++i)
-    {
-      bool zero_col = true;
-
-      if (tmp_dbl[i][i] != 0) // TODO: EPSILON
-        zero_col = false;
-      else
-        for (size_t j = i + 1; j < rows_; ++j)
-          if (tmp_dbl[j][i] != 0)
-          {
-            tmp_dbl.swap_lines(j, i);
-            zero_col = false;
-            sign = -sign;
-            break;
-          }
-
-      if (zero_col)
-        return 0;
-
-      for (size_t k = i + 1; k < rows_; ++k)
-      {
-        if (tmp_dbl[k][i] == 0) // TODO: EPSILON
-          continue;
-
-        long double mul = tmp_dbl[k][i] / tmp_dbl[i][i];
-        tmp_dbl.add_line(k, i, -mul);
-      }
-    }
-
-    long double res = sign;
-    for (size_t i = 0; i < cols_; ++i)
-      res *= tmp_dbl[i][i];
-
-    return res;
-  }
 
   template <typename DataT>
   Matrix<DataT> & Matrix<DataT>::transpose ( ) &
@@ -553,48 +493,6 @@ namespace MX
   bool Matrix<DataT>::operator!= (const Matrix & matr) const
   {
     return !operator==(matr);
-  }
-
-  template <typename DataT>
-  bool Matrix<DataT>::swap_lines (size_t l1, size_t l2)
-  {
-    if (l1 >= cols_ || l2 >= cols_)
-      throw std::range_error("Lines' numbers wrong.");
-
-    std::swap(arr_[l1], arr_[l2]);
-
-    return true;
-  }
-
-  template <typename DataT>
-  bool Matrix<DataT>::add_line (size_t to, size_t from, DataT mul)
-  {
-    if (to >= cols_ || from >= cols_)
-      throw std::range_error("Lines' numbers wrong.");
-
-    Matrix<DataT> tmp{*this};
-
-    for (size_t i = 0; i < cols_; ++i)
-      tmp.set(to, i, tmp[to][i] + mul * arr_[from][i]);
-
-    swap(tmp);
-    return true;
-  }
-
-  template <typename DataT>
-  bool Matrix<DataT>::mul_line (size_t l, DataT mul)
-  {
-    if (l >= cols_)
-      throw std::range_error("Line number wrong.");
-
-    Matrix<DataT> tmp{*this};
-
-    for (size_t i = 0; i < cols_; ++i)
-      tmp.set(l, i, tmp[l][i] * mul);
-
-    swap(tmp);
-
-    return true;
   }
 
   template <typename DataT>
