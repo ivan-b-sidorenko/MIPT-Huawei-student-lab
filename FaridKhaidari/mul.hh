@@ -27,7 +27,8 @@ namespace MUL
     template <typename DataT>
     Matrix<DataT> trivial_threads( const Matrix<DataT> & lhs, const Matrix<DataT> & rhs );
 
-
+    template <typename DataT>
+    Matrix<DataT> trivial_threads2x( const Matrix<DataT> & lhs, const Matrix<DataT> & rhs );
 
 
     template <typename DataT>
@@ -42,6 +43,8 @@ namespace MUL
     template <typename DataT>
     Matrix<DataT> transpose_cycle8x( const Matrix<DataT> & lhs, const Matrix<DataT> & rhs );
 
+    template <typename DataT>
+    Matrix<DataT> transpose_threads( const Matrix<DataT> & lhs, const Matrix<DataT> & rhs );
 
 
 
@@ -175,7 +178,7 @@ namespace MUL
                lhs_c = lhs.cols(),
                rhs_c = rhs.cols();
 
-        auto THREADS_NUM = std::thread::hardware_concurrency() - 1;
+        auto THREADS_NUM = std::thread::hardware_concurrency();
 
         std::vector<std::thread> threads;
         threads.reserve(THREADS_NUM);
@@ -184,16 +187,17 @@ namespace MUL
 
         Matrix<DataT> tmp{lhs_r, rhs_c};
         std::mutex mx_mx;
+
         auto f = [&](size_t c)
         {
-            mx_mx.lock();
             for (size_t m = c * NN, end = std::min((c + 1)  * NN, lhs_r); m < end; ++m)
             {
+                mx_mx.lock();
                 for (size_t j = 0; j < rhs_c; ++j)
                     for (size_t k = 0; k < lhs_c; ++k)
                         tmp.set(m, j, tmp[m][j] + lhs[m][k] * rhs[k][j]);
+                mx_mx.unlock();
             }
-            mx_mx.unlock();
         };
 
         for (size_t i = 0; i < THREADS_NUM; ++i)
@@ -204,6 +208,57 @@ namespace MUL
 
         return tmp;
     }
+
+    template <typename DataT>
+    Matrix<DataT> trivial_threads2x( const Matrix<DataT> & lhs, const Matrix<DataT> & rhs )
+    {
+        std::cout << "TRIVIAL THREADS 2X" << std::endl;
+
+        size_t lhs_r = lhs.rows(),
+               lhs_c = lhs.cols(),
+               rhs_c = rhs.cols();
+
+        auto THREADS_NUM = std::thread::hardware_concurrency();
+
+        std::vector<std::thread> threads;
+        threads.reserve(THREADS_NUM);
+
+        size_t NN = lhs_r / THREADS_NUM + 1;
+
+        Matrix<DataT> tmp{lhs_r, rhs_c};
+        std::mutex mx_mx;
+
+        auto f = [&](size_t c)
+        {
+            for (size_t m = c * NN, end = std::min((c + 1)  * NN, lhs_r); m < end; ++m)
+            {
+                mx_mx.lock();
+                for (size_t j = 0; j < rhs_c; ++j)
+                {
+                    size_t k = 0;
+                    for (size_t end = lhs_c - 2; k < end; k += 2)
+                        tmp.set(m, j, tmp[m][j] + lhs[m][k] * rhs[k][j]
+                                                + lhs[m][k+1] * rhs[k+1][j]);
+                    
+                    while (k < lhs_c)
+                    {
+                        tmp.set(m, j, tmp[m][j] + lhs[m][k] * rhs[k][j]);
+                        ++k;
+                    }
+                }
+                mx_mx.unlock();
+            }
+        };
+
+        for (size_t i = 0; i < THREADS_NUM; ++i)
+            threads.push_back(std::thread(f, i));
+
+        for (std::thread & t : threads)
+            t.join();
+
+        return tmp;
+    }
+
 
 
 
@@ -327,6 +382,48 @@ namespace MUL
             }
 
         return tmp1;
+    }
+
+    template <typename DataT>
+    Matrix<DataT> transpose_threads( const Matrix<DataT> & lhs, const Matrix<DataT> & rhs )
+    {
+        std::cout << "TRANSPOSE THREADS" << std::endl;
+
+        size_t lhs_r = lhs.rows(),
+               lhs_c = lhs.cols(),
+               rhs_c = rhs.cols();
+
+        auto THREADS_NUM = std::thread::hardware_concurrency();
+
+        std::vector<std::thread> threads;
+        threads.reserve(THREADS_NUM);
+
+        size_t NN = lhs_r / THREADS_NUM + 1;
+
+        Matrix<DataT> tmp{lhs_r, rhs_c};
+        std::mutex mx_mx;
+
+        auto rhs_t = MX::transpose(rhs);
+
+        auto f = [&](size_t c)
+        {
+            for (size_t m = c * NN, end = std::min((c + 1)  * NN, lhs_r); m < end; ++m)
+            {
+                mx_mx.lock();
+                for (size_t j = 0; j < rhs_c; ++j)
+                    for (size_t k = 0; k < lhs_c; ++k)
+                        tmp.set(m, j, tmp[m][j] + lhs[m][k] * rhs_t[j][k]);
+                mx_mx.unlock();
+            }
+        };
+
+        for (size_t i = 0; i < THREADS_NUM; ++i)
+            threads.push_back(std::thread(f, i));
+
+        for (std::thread & t : threads)
+            t.join();
+
+        return tmp;
     }
 
 

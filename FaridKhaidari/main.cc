@@ -80,7 +80,10 @@ int main( )
                            MUL::trivial_cycle8x,
                            MUL::transpose_cycle8x,
                            
-                           MUL::trivial_threads};
+                           MUL::trivial_threads,
+                           MUL::transpose_threads,
+                           
+                           MUL::trivial_threads2x};
 
     auto mul = m1 * m2;
     for (auto && func : functions)
