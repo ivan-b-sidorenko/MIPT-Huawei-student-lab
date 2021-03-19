@@ -1,5 +1,5 @@
-CC = g++
-CFLAGS = -c -mavx2 -mavx -O0 -std=c++14 -MD
+CC = clang++
+CFLAGS = -c -mavx2 -mavx -mfma -O0 -std=c++14 -MD
 
 
 all: main
