@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdio>
-#include <ctime>
+#include <chrono>
 
 #include "mul.hh"
 
@@ -22,12 +22,13 @@ auto speed_test( const Matrix<double> & m1,
     static uint counter = 0;
 
     cout << "Algo" << counter++ << ": ";
-    auto start = std::clock();
+    auto start = std::chrono::steady_clock::now();
 
     Matrix<double> res = (*func)(m1, m2);
-    auto time = static_cast<double>(std::clock() - start) /
-                static_cast<double>(CLOCKS_PER_SEC) * 1000;
-
+    auto end = std::chrono::steady_clock::now();
+    
+    auto time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    
     if (mul != res)
         cout << "INCORRECT" << endl;
 
