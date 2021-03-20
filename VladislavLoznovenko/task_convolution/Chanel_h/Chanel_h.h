@@ -20,5 +20,6 @@ public:
 
 	Chanel& operator=(const Chanel& rhs);
 	bool operator==(const Chanel& rhs);
+	matrix::Matrix& operator[](int num) {return chanels[num];};
 	friend std::ostream& operator<<(std::ostream& out , const Chanel& rhs);
 };
