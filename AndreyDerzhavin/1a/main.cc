@@ -50,7 +50,21 @@ int main( void )
     {Mul::Mul_prom2x, "Prom 2x"},
     {Mul::Mul_prom2x_t, "Prom 2x transpose"},
     {Mul::Mul_prom4x, "Prom 4x"},
-    {Mul::Mul_prom4x_t, "Prom 4x transpose"}
+    {Mul::Mul_prom4x_t, "Prom 4x transpose"},
+    {Mul::Mul_prom8x, "Prom 8x"},
+    {Mul::Mul_prom8x_t, "Prom 8x transpose"},
+    {Mul::Mul_prom16x, "Prom 16x"},
+    {Mul::Mul_prom16x_t, "Prom 16x transpose"},
+    {Mul::Mul_Naive_ptmp, "Naive tmp common var"},
+    {Mul::Mul_nai_Transpose_ptmp, "Naive Transpose tmp common var"},
+    {Mul::Mul_prom2x_ptmp, "Prom 2x tmp common var"},
+    {Mul::Mul_prom2x_t_ptmp, "Prom 2x transpose tmp common var"},
+    {Mul::Mul_prom4x_ptmp, "Prom 4x tmp common var"},
+    {Mul::Mul_prom4x_t_ptmp, "Prom 4x transpose tmp common var"},
+    {Mul::Mul_prom8x_ptmp, "Prom 8x tmp common var"},
+    {Mul::Mul_prom8x_t_ptmp, "Prom 8x transpose tmp common var"},
+    {Mul::Mul_prom16x_ptmp, "Prom 16x tmp common var"},
+    {Mul::Mul_prom16x_t_ptmp, "Prom 16x transpose tmp common var"}
   };
 
   for (auto &&f : funcs)
