@@ -104,6 +104,7 @@ namespace Mul
     return res;
   }
 
+
   Mat Mul_prom2x_ptmp( const Mat &lhs, const Mat &rhs )
   {
     Mat res{lhs.getRows(), rhs.getCols()};
