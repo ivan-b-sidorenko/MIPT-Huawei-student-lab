@@ -33,13 +33,11 @@ namespace linal
 
       const T &operator []( size_t i ) const
       {
-        assert(i < m_cols);
         return m_row[i];
       }
 
       T &operator []( size_t i )
       {
-        assert(i < m_cols);
         return m_row[i];
       }
 
@@ -50,7 +48,7 @@ namespace linal
 
   public:
 
-    Matrix( size_t rows = 1, size_t cols = 1 );
+    Matrix( size_t rows = 0, size_t cols = 0 );
 
     template <typename It>
     Matrix( size_t rows, size_t cols, It begin, It end );
@@ -70,16 +68,9 @@ namespace linal
     // move
     Matrix &operator =( Matrix &&matr );
 
-    Matrix &operator +=( const Matrix &matr );
-    Matrix &operator -=( const Matrix &matr );
-    Matrix &operator *=( const Matrix &matr );
-    Matrix &operator *=( T val );
-
     Matrix &Transpose( void );
 
     Matrix Transposing( void ) const;
-
-    ldbl Det( void ) const;
 
     size_t getCols( void ) const { return cols_; }
     size_t getRows( void ) const { return rows_; }
@@ -90,7 +81,6 @@ namespace linal
 
     Row_matr operator []( size_t i ) const
     {
-      assert(i < rows_);
       return Row_matr{cols_, matr_[i]};
     }
 
@@ -101,8 +91,6 @@ namespace linal
     }
 
     ~Matrix( void );
-
-    void AddLineMVal( size_t dest_ind, size_t src_ind, ldbl val );
 
     bool IsEq( const Matrix &matr ) const;
 
@@ -127,35 +115,12 @@ namespace linal
     /* copy matrix with identical sizes function */
     static void Copy( Matrix &dst, const Matrix &src );
 
-    void SwapLines( size_t lhs, size_t rhs );
-
-    void AddLine( size_t dest_ind, size_t src_ind );
-
-    void MulLine( size_t line, ldbl val );
-
-    int FindNonZero( size_t st_col ) const;
-
     template <typename walk_func>
     void Walker( walk_func walk );
   };
 
   template <typename T>
   bool operator ==( const Matrix<T> &lhs, const Matrix<T> &rhs );
-
-  template <typename T>
-  Matrix<T> operator +( const Matrix<T> &lhs, const Matrix<T> &rhs );
-
-  template <typename T>
-  Matrix<T> operator -( const Matrix<T> &lhs, const Matrix<T> &rhs );
-
-  template <typename T>
-  Matrix<T> operator *( const Matrix<T> &lhs, const Matrix<T> &rhs );
-
-  template <typename T>
-  Matrix<T> operator *( const Matrix<T> &lhs, T val );
-
-  template <typename T>
-  Matrix<T> operator *( T val, const Matrix<T> &lhs );
 
   template<typename T>
   std::ostream &operator <<( std::ostream &ost, const Matrix<T> &matr );
@@ -168,8 +133,6 @@ namespace linal
 }
 
 
-
-
 template <typename T>
 linal::ldbl linal::Matrix<T>::threshold = linal::MAT_THRESHOLD;
 
@@ -179,7 +142,7 @@ linal::Matrix<T>::Matrix( size_t rows, size_t cols ) : matr_(nullptr),
                                                      cols_(cols)
 {
   Alloc();
-  Walker([this]( int, int ) { return T{}; });
+  Walker([]( int, int ) { return T{}; });
 }
 
 template <typename T>
@@ -268,54 +231,6 @@ linal::Matrix<T> & linal::Matrix<T>::operator =( linal::Matrix<T> &&matr )
 }
 
 template <typename T>
-linal::Matrix<T> &linal::Matrix<T>::operator +=( const linal::Matrix<T> &matr )
-{
-  assert(matr.rows_ == rows_ && matr.cols_ == cols_);
-
-  auto add_fnc = [&]( int i, int j ) { return matr_[i][j] + matr.matr_[i][j]; };
-  Walker(add_fnc);
-
-  return *this;
-}
-
-template <typename T>
-linal::Matrix<T> &linal::Matrix<T>::operator -=( const linal::Matrix<T> &matr )
-{
-  assert(matr.rows_ == rows_ && matr.cols_ == cols_);
-  auto add_fnc = [&]( int i, int j ){return matr_[i][j] - matr.matr_[i][j];};
-  Walker(add_fnc);
-
-  return *this;
-}
-
-template <typename T>
-linal::Matrix<T> &linal::Matrix<T>::operator *=( const Matrix &matr )
-{
-  assert(cols_ == matr.rows_);
-
-  auto mul_func = [&]( int i, int j )
-    {
-      T new_el = 0;
-      for (size_t r = 0; r < temp.cols_; ++r)
-        new_el += temp.matr_[r][i] * matr.matr_[r][j];
-
-      return new_el;
-    };
-  Walker(mul_func);
-
-  return *this;
-}
-
-template <typename T>
-linal::Matrix<T> &linal::Matrix<T>::operator *=( T val )
-{
-  auto mul_fnc = [&]( int i, int j ){ return matr_[i][j] * val; };
-  Walker(mul_fnc);
-
-  return *this;
-}
-
-template <typename T>
 linal::Matrix<T> &linal::Matrix<T>::Transpose( void )
 {
   if (rows_ == cols_)
@@ -335,55 +250,6 @@ linal::Matrix<T> linal::Matrix<T>::Transposing( void ) const
 }
 
 template <typename T>
-int linal::Matrix<T>::FindNonZero( size_t st_col ) const
-{
-  for (size_t i = st_col + 1; i < cols_; ++i)
-    if (!IsZero(matr_[i][st_col]))
-      return i;
-
-  return -1;
-}
-
-template <typename T>
-linal::ldbl linal::Matrix<T>::Det( void ) const
-{
-  if (rows_ != cols_)
-    return NAN;
-
-  int sign = 1;
-
-  // check if the type is valid
-  if (!std::is_arithmetic_v<T>)
-    return NAN;
-
-  Matrix<T> tmp{*this};
-
-
-  for (size_t i = 0; i < rows_ - 1; ++i)
-  {
-    if (IsZero(tmp.matr_[i][i]))
-    {
-      int non_z_line = tmp.FindNonZero(i);
-      if (non_z_line == -1)
-        return 0;
-
-      tmp.SwapLines(non_z_line, i);
-      sign = -sign;
-    }
-
-    T div = tmp.matr_[i][i];
-    for (size_t j = i + 1; j < rows_; ++j)
-      tmp.AddLineMVal(j, i, -static_cast<ldbl>(tmp.matr_[j][i]) / div);
-  }
-
-  ldbl det = sign;
-  for (size_t i = 0; i < rows_; ++i)
-    det *= tmp.matr_[i][i];
-
-  return det;
-}
-
-template <typename T>
 linal::Matrix<T> linal::Matrix<T>::Identity( size_t rows )
 {
   Matrix id(rows, rows, []( int i, int j ) { return i == j; });
@@ -393,48 +259,12 @@ linal::Matrix<T> linal::Matrix<T>::Identity( size_t rows )
 template <typename T>
 const T &linal::Matrix<T>::At( size_t i, size_t j ) const
 {
-  assert(i < rows_);
-  assert(j < cols_);
+  if (i >= rows_)
+    throw std::out_of_range{"Row index is too big"};
+  if (j >= cols_)
+    throw std::out_of_range{"Col index is too big"};
 
   return matr_[i][j];
-}
-
-template <typename T>
-void linal::Matrix<T>::SwapLines( size_t lhs, size_t rhs )
-{
-  assert(lhs < rows_);
-  assert(rhs < rows_);
-
-  std::swap(matr_[lhs], matr_[rhs]);
-}
-
-template <typename T>
-void linal::Matrix<T>::AddLine( size_t dest_ind, size_t src_ind )
-{
-  assert(dest_ind < rows_);
-  assert(src_ind < rows_);
-
-  for (int i = 0; i < cols_; ++i)
-    matr_[dest_ind][i] += matr_[src_ind][i];
-}
-
-template <typename T>
-void linal::Matrix<T>::AddLineMVal( size_t dest_ind, size_t src_ind, ldbl val )
-{
-  assert(dest_ind < rows_);
-  assert(src_ind < rows_);
-
-  for (size_t i = 0; i < cols_; ++i)
-    matr_[dest_ind][i] += val * matr_[src_ind][i];
-}
-
-template <typename T>
-void linal::Matrix<T>::MulLine( size_t line, ldbl val )
-{
-  assert(line < rows_);
-
-  for (int i = 0; i < cols_; ++i)
-    matr_[line][i] *= val;
 }
 
 template <typename T>
@@ -521,8 +351,8 @@ void linal::Matrix<T>::Swap( linal::Matrix<T> &lhs, linal::Matrix<T> &rhs )
 template <typename T>
 void linal::Matrix<T>::Copy( linal::Matrix<T> &dst, const linal::Matrix<T> &src )
 {
-  assert(dst.rows_ == src.rows_);
-  assert(dst.cols_ == src.cols_);
+  if (dst.rows_ != src.rows_ || dst.cols_ != src.cols_)
+    throw std::invalid_argument{"Matrixies have differrent sizes"};
 
   for (size_t i = 0; i < dst.rows_; ++i)
     for (size_t j = 0; j < dst.cols_; ++j)
@@ -533,48 +363,6 @@ template <typename T>
 bool linal::operator ==( const Matrix<T> &lhs, const Matrix<T> &rhs )
 {
   return lhs.IsEq(rhs);
-}
-
-template <typename T>
-linal::Matrix<T> linal::operator +( const Matrix<T> &lhs, const Matrix<T> &rhs )
-{
-  Matrix<T> temp{lhs};
-  temp += rhs;
-
-  return temp;
-}
-
-template <typename T>
-linal::Matrix<T> linal::operator -( const Matrix<T> &lhs, const Matrix<T> &rhs )
-{
-  Matrix<T> temp{lhs};
-  temp -= rhs;
-
-  return temp;
-}
-
-template <typename T>
-linal::Matrix<T> linal::operator *( const Matrix<T> &lhs, const Matrix<T> &rhs )
-{
-  Matrix<T> temp{lhs};
-  temp *= rhs;
-
-  return temp;
-}
-
-template <typename T>
-linal::Matrix<T> linal::operator *( const Matrix<T> &lhs, T val )
-{
-  Matrix<T> temp{lhs};
-  temp *= val;
-
-  return temp;
-}
-
-template <typename T>
-linal::Matrix<T> linal::operator *( T val, const Matrix<T> &rhs )
-{
-  return rhs * val;
 }
 
 template<typename T>
