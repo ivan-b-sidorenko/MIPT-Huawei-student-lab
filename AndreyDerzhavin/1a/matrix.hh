@@ -110,6 +110,11 @@ namespace linal
   std::istream &InputQuadr( std::istream &ist, Matrix<T> &matr );
 }
 
+namespace Mul
+{
+  using type = int;
+  using Mat = linal::Matrix<type>;
+}
 
 template <typename T>
 linal::ldbl linal::Matrix<T>::threshold = linal::MAT_THRESHOLD;

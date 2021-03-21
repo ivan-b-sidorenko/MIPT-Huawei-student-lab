@@ -5,10 +5,6 @@
 
 namespace Mul
 {
-  using type = int;
-  using Mat = linal::Matrix<type>;
-  
-
   Mat Mul_Naive( const Mat &lhs, const Mat &rhs )
   {
     auto res = Mat{lhs.getRows(), rhs.getCols()};

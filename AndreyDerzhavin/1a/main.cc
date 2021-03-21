@@ -4,6 +4,7 @@
 #include <string>
 
 #include "mul.hh"
+#include "mul_th.hh"
 
 using std::string;
 using std::vector;
@@ -64,7 +65,11 @@ int main( void )
     {Mul::Mul_prom8x_ptmp, "Prom 8x tmp common var"},
     {Mul::Mul_prom8x_t_ptmp, "Prom 8x transpose tmp common var"},
     {Mul::Mul_prom16x_ptmp, "Prom 16x tmp common var"},
-    {Mul::Mul_prom16x_t_ptmp, "Prom 16x transpose tmp common var"}
+    {Mul::Mul_prom16x_t_ptmp, "Prom 16x transpose tmp common var"},
+    {Mul::Mul_th<2>, "2 Threads"},
+    {Mul::Mul_th<4>, "4 Threads"},
+    {Mul::Mul_th<8>, "8 Threads"},
+    {Mul::Mul_th<16>, "16 Threads"}
   };
 
   for (auto &&f : funcs)

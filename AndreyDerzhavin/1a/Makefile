@@ -3,9 +3,9 @@ EXEC = matr.o
 
 STD = --std=c++2a
 WARNS = -Wall -Wextra -Wno-old-style-cast -Weffc++  -Wnon-virtual-dtor -Wswitch-enum -Wunused
-OPT = -O0
+OPT = -O0 
 
-CC = clang++ $(STD) $(WARNS) $(OPT)
+CC = clang++ -pthread $(STD) $(WARNS) $(OPT)
 
 all: naive
 
