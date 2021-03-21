@@ -1,3 +1,4 @@
+#pragma once
 #pragma vector
 #include <iostream>
 #include <fstream>
@@ -16,7 +17,6 @@ namespace linear {
             int col;
         public:
             int** arr;
-        public:
             Matrix(int _row, int _col);
             Matrix(int _row, int _col, int** _arr);
             Matrix(Matrix& A);
@@ -26,6 +26,8 @@ namespace linear {
             bool mul_impr(const Matrix& right, Matrix& result);
             bool mul(Matrix& right, Matrix& result);          //it is mul first version
             bool mul_thread(const Matrix& right, Matrix& result);
+            bool mul_intrinsic(const Matrix& right, Matrix& result);
+            bool compare(const Matrix& B) const;
             void print() const;
             void record(std::string name) const;
             ~Matrix();
@@ -69,11 +71,8 @@ namespace linear {
         for(int i = 0; i < row; ++i) {
             arr[i] = new int[col];
         }
-        //for(int i = 0; i < row; ++i) {
-        //   for(int j = 0; j < col; ++j) {
         for(int j = 0; j < col; ++j) {
             int i = 7;
-            //for(i = 7; i < row; i += 8) {
             while( i < row ) {
                 arr[i-7][j] = A.arr[i-7][j];
                 arr[i-6][j] = A.arr[i-6][j];
@@ -138,6 +137,60 @@ namespace linear {
             fout << std::endl;
         }
         fout.close();
+    }
+    
+    bool Matrix::mul_intrinsic(const Matrix& right, Matrix& result) {
+        if ( col != right.row ) {
+            std::cout << "WRONG! Incorrect matrix dimensions are set\n";
+            return false;
+        }
+        int M = result.row;
+        int N = result.col;
+        int num = 0;
+        int num1 = 0;
+        int c = 0;
+        int block = sizeof(__m128i) / sizeof(int);
+        if ( col < block ) {
+            this->mul_impr(right, result);
+            return true;
+        }
+        for(int j = 0; j < N; ++j) {
+            int Y[col];
+            for(int q = 0; q < col; ++q) {
+                Y[q] = right.arr[q][num];
+            }
+            num++;
+            __m128i* Yb = (__m128i*) Y;
+            c = 0;
+            num1 = 0;
+            for(int i = 0; i < M; ++i) {
+                int X[col];                     
+                __m128i* Yb = (__m128i*) Y;
+                for(int q = 0; q < col; ++q) {
+                    X[q] = arr[num1][q];
+                }
+                num1++;
+                __m128i* Xa = (__m128i*) X;
+                __m128i val_c = _mm_setzero_si128();
+                for(int k = 0; k < col / block; ++k) {
+                    __m128i val_a = _mm_load_si128(Xa);
+                    __m128i val_b = _mm_load_si128(Yb);
+                    __m128i mul = _mm_mullo_epi32(val_a, val_b);
+                    val_c = _mm_add_epi32(val_c, mul);
+                    Xa++;
+                    Yb++;
+                }                                               
+                __m128i tmp = _mm_hadd_epi32(val_c, val_c);
+                __m128i tmp2 = _mm_hadd_epi32(tmp, tmp);  
+                c = _mm_cvtsi128_si32(tmp2);
+                int tail = 0;
+                for (size_t i = (col / block) * block; i < col; i++) {                  //считаем остаток
+                    tail += X[i] * Y[i];
+                }
+                result.arr[i][j] = c + tail;
+            }
+        }
+        return true;
     }
 
     bool Matrix::mul_impr(const Matrix& right, Matrix& result) {              // Matrix C = A * B;
@@ -295,6 +348,21 @@ namespace linear {
                     result.arr[i][j] += (arr[i][k] * right.arr[k][j]);
                 }
             }
+        }
+        return true;
+    }
+    bool Matrix::compare(const Matrix& B) const {
+        if ( ( row == B.get_row() ) & ( col == B.get_col() ) ) {
+            for(int i = 0; i < row; ++i) {
+                for(int j = 0; j < col; ++j) {
+                    if ( arr[i][j] != B.arr[i][j] ) {
+                        return false;
+                    }
+                }
+            }
+        }
+        else {
+            return false;
         }
         return true;
     }
