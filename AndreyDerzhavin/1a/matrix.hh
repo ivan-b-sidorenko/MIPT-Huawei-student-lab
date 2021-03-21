@@ -22,30 +22,6 @@ namespace linal
     // emplace function type
     //using empl_func = T (*)( int, int );
 
-    struct Row_matr
-    {
-      size_t m_cols;
-      T *m_row;
-
-      Row_matr( size_t cols, T *row ) : m_cols(cols),
-                                        m_row(row)
-      {}
-
-      const T &operator []( size_t i ) const
-      {
-        return m_row[i];
-      }
-
-      T &operator []( size_t i )
-      {
-        return m_row[i];
-      }
-
-      Row_matr( const Row_matr &row_m ) = default;
-
-      Row_matr &operator =( const Row_matr &row_m ) = default;
-    };
-
   public:
 
     Matrix( size_t rows = 0, size_t cols = 0 );
@@ -79,16 +55,17 @@ namespace linal
 
     const T &At( size_t i, size_t j ) const;
 
-    Row_matr operator []( size_t i ) const
+    const T *operator []( size_t i ) const
     {
-      return Row_matr{cols_, matr_[i]};
+      return matr_[i];
     }
 
-    Row_matr operator []( size_t i )
+    T *operator []( size_t i )
     {
-      assert(i < rows_);
-      return Row_matr{cols_, matr_[i]};
+      return matr_[i];
     }
+
+    bool empty( void ) const { return cols_ == 0 || rows_ == 0; }
 
     ~Matrix( void );
 
@@ -102,6 +79,10 @@ namespace linal
 
     static bool IsZero( ldbl val ) { return std::abs(val) < threshold; }
 
+
+    template <typename walk_func>
+    void Walker( walk_func walk );
+
   private:
     Matrix &Transpose_Quad( void );
 
@@ -114,9 +95,6 @@ namespace linal
 
     /* copy matrix with identical sizes function */
     static void Copy( Matrix &dst, const Matrix &src );
-
-    template <typename walk_func>
-    void Walker( walk_func walk );
   };
 
   template <typename T>
@@ -281,6 +259,9 @@ linal::Matrix<T>::~Matrix( void )
 template <typename T>
 bool linal::Matrix<T>::IsEq( const Matrix &matr ) const
 {
+  if (rows_ != matr.rows_ || cols_ != matr.cols_)
+    return false;
+
   if (std::is_arithmetic_v<T>)
   {
     for (size_t i = 0; i < rows_; ++i)
@@ -292,7 +273,7 @@ bool linal::Matrix<T>::IsEq( const Matrix &matr ) const
   {
     for (size_t i = 0; i < rows_; ++i)
       for (size_t j = 0; j < cols_; ++j)
-        if (matr_[i][j] != matr.matr_[i][j])
+        if (!(matr_[i][j] == matr.matr_[i][j]))
           return false;
   }
   return true;
@@ -323,6 +304,9 @@ linal::Matrix<T> &linal::Matrix<T>::Transpose_Quad( void )
 template <typename T>
 void linal::Matrix<T>::Alloc( void )
 {
+  if (cols_ == 0 || rows_ == 0)
+    return;
+
   matr_ = new T *[rows_];
 
   for (size_t i = 0; i < rows_; ++i)
