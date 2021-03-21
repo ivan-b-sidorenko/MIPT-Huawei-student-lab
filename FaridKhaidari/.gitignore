@@ -1,0 +1,20 @@
+.m_build/
+
+../.idea/
+../.vscode/
+.idea/
+.vscode/
+
+cmake-build-debug/
+build/
+theory/
+
+*.xml
+../*.xml
+
+*.exe
+
+# CMakeLists.txt
+cmake*
+
+callgrind*
