@@ -30,7 +30,6 @@ void TEST1(linear::Matrix& A, linear::Matrix& B, linear::Matrix& result) {
     for(int i = 0; i < Time1.size(); ++i) {
         time += Time1[i];
     }
-    //result.print();
     result.record("OUT_TEST1");
     std::cout << "The first time: " << time / Time1.size() << " ms\n";
 }
@@ -63,7 +62,6 @@ void TEST3(linear::Matrix& A1, linear::Matrix& B1, linear::Matrix& result1) {
     linear::Matrix B2(B1);
     linear::Matrix B3(B1);
     linear::Matrix B4(B1);
-    //linear::Matrix result1(my_row, my_col);
     linear::Matrix result2(my_row, my_col);
     linear::Matrix result3(my_row, my_col);
     linear::Matrix result4(my_row, my_col);
@@ -87,12 +85,10 @@ void TEST3(linear::Matrix& A1, linear::Matrix& B1, linear::Matrix& result1) {
     }
     result1.record("OUT_TEST3");
     std::cout << "The optimization + middle threads time(linear equation): " << max_time / Time.size() << " ms\n";
-    //std::cout << std::thread::hardware_concurrency() << std::endl;
 }
 
 void TEST4(linear::Matrix& A, linear::Matrix& B, linear::Matrix& result) {
     std::vector<int> Time;
-    //linear::Matrix result(A.get_row(), B.get_col());
     for(int i = 0; i < 4; ++i) {
         auto begin = std::chrono::steady_clock::now();
         bool p = A.mul_thread(B, result);
@@ -176,9 +172,6 @@ int main() {
     }
     linear::Matrix A(row, col, arr);
     linear::Matrix B(row2, col2, arr2);
-    //A.print();
-    //my_print("NEXT");
-    //B.print();
     linear::Matrix main_result(row, col2);
     linear::Matrix result2(row, col2);
     linear::Matrix result3(row, col2);
