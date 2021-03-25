@@ -46,6 +46,16 @@ void matrix_GPU::set_queue(int* lhs , int* rhs , int* result , int lhs_str , int
     size_t work_units_per_kernel = lhs_str;
     clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &work_units_per_kernel, NULL, 0, NULL, NULL);
     clEnqueueReadBuffer(queue, res_buff, CL_TRUE, 0, sizeof(int) * lhs_str * rhs_col, result, 0, NULL, NULL);
+
+    clReleaseMemObject(mat_lhs_buff);
+    clReleaseMemObject(mat_rhs_buff);
+    clReleaseMemObject(lhs_col_buff);
+    clReleaseMemObject(rhs_col_buff);
+    clReleaseMemObject(res_buff);
+    clReleaseKernel(kernel);
+    clReleaseCommandQueue(queue);
+    clReleaseProgram(program);
+    clReleaseContext(context);
 }
 
 void matrix_GPU::matrix_GPU_product(matrix::Matrix& lhs , matrix::Matrix& rhs , matrix::Matrix& result)
@@ -57,9 +67,9 @@ void matrix_GPU::matrix_GPU_product(matrix::Matrix& lhs , matrix::Matrix& rhs , 
 	int lhs_str = lhs.get_num_str();
 	int rhs_col = rhs.get_num_col();
 
-	int* res = (int*)calloc(sizeof(int) , rhs_col * lhs_str);
+	int* res = new int[rhs_col * lhs_col];
 
-	int* lhs_per = ((int*)calloc(sizeof(int) , lhs_col * lhs_str));
+	int* lhs_per = new int[lhs_col * lhs_str];
 	for (int i = 0 ; i < lhs_str ; ++i)
 	{
 		for (int j = 0 ; j < lhs_col ; ++j)
@@ -68,7 +78,7 @@ void matrix_GPU::matrix_GPU_product(matrix::Matrix& lhs , matrix::Matrix& rhs , 
 		}
 	}
 
-	int* rhs_per = ((int*)calloc(sizeof(int) , lhs_str * rhs_col));
+	int* rhs_per = new int[lhs_col * rhs_col];
 	for (int i = 0 ; i < lhs_col ; ++i)
 	{
 		for (int j = 0 ; j < rhs_col ; ++j)
@@ -84,5 +94,9 @@ void matrix_GPU::matrix_GPU_product(matrix::Matrix& lhs , matrix::Matrix& rhs , 
 		for (int j = 0 ; j < rhs_col ; ++j)
 			result[i][j] = res[i * rhs_col + j];
 	}
+
+	delete[] res;
+	delete[] rhs_per;
+	delete[] lhs_per;
 }
 
