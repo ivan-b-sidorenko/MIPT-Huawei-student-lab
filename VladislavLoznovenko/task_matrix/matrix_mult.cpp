@@ -2,72 +2,64 @@
 
 void matrix_GPU::set_device()
 {
-	cl_platform_id platform;
-	clGetPlatformIDs(1 , &platform , NULL);
-	clGetDeviceIDs(platform , CL_DEVICE_TYPE_GPU , 1 , &device , NULL);
-	context = clCreateContext(NULL , 1 , &device , NULL , NULL , NULL);
+	std::vector<cl::Platform> platforms;
+	cl::Platform::get(&platforms);
+	for (const auto& platform : platforms)
+	{
+		std::vector<cl::Device> platform_devices;
+		platform.getDevices(CL_DEVICE_TYPE_ALL , &platform_devices);
+		for (const auto& device : platform_devices)
+			if(device.getInfo<CL_DEVICE_COMPILER_AVAILABLE>())
+	    	{
+	    		device_ = device;
+	    		return;
+	    	}
+	}
 }
 
 void matrix_GPU::build_program()
 {
-	FILE *program_handel;
-	if ((program_handel = fopen(PROGRAM_FILE, "r")) == NULL)
-		std::cout << "fopen error" << std::endl;
+	std::ifstream program_file(PROGRAM_FILE);
+	std::string program_String(std::istreambuf_iterator<char>(program_file),(std::istreambuf_iterator<char>()));
+	cl::Program::Sources source(1, std::make_pair(program_String.c_str(), program_String.length()+1));
+	cl::Program program(context_, source);
+	program.build();
 
-    fseek(program_handel, 0, SEEK_END);
-	size_t program_size = ftell(program_handel);
-	rewind(program_handel);
-	char* program_buffer = (char*)malloc(program_size + 1);
-	program_buffer[program_size] = '\0';
-	fread(program_buffer , sizeof(char) , program_size , program_handel);
-	fclose(program_handel);
-	program = clCreateProgramWithSource(context , 1 , (const char**)&program_buffer , &program_size , NULL);
-	free(program_buffer);
-	clBuildProgram(program , 0 , NULL , NULL , NULL , NULL);
+	kernel_ = cl::Kernel(program , KERNEL_FUNC);
 }
 
 void matrix_GPU::set_queue(int* lhs , int* rhs , int* result , int lhs_str , int lhs_col , int rhs_col)
-{
-	kernel = clCreateKernel(program, KERNEL_FUNC, NULL);
-    queue = clCreateCommandQueue(context, device, 0, NULL);
-    cl_mem mat_lhs_buff , mat_rhs_buff , res_buff , lhs_col_buff , rhs_col_buff;
-    mat_lhs_buff = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * lhs_str * lhs_col , lhs, NULL);
-    mat_rhs_buff = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * lhs_col * rhs_col , rhs, NULL);
-    lhs_col_buff = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) , &lhs_col, NULL);
-    rhs_col_buff = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) , &rhs_col, NULL);
-	res_buff = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(int) * lhs_str * rhs_col, NULL, NULL);
+{	
+	cl::Buffer lhs_buff(context_ , CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR , sizeof(int) * lhs_str * lhs_col , lhs , NULL);
+	cl::Buffer rhs_buff(context_ , CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR , sizeof(int) * rhs_col * lhs_col , rhs , NULL);
+	cl::Buffer res_buff(context_ , CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR , sizeof(int) * lhs_str * rhs_col , result , NULL);
 
-    clSetKernelArg(kernel, 0, sizeof(cl_mem), &mat_lhs_buff);
-    clSetKernelArg(kernel, 1, sizeof(cl_mem), &mat_rhs_buff);
-    clSetKernelArg(kernel, 2, sizeof(cl_mem), &res_buff);
-    clSetKernelArg(kernel, 3, sizeof(cl_mem), &(lhs_col_buff));
-    clSetKernelArg(kernel, 4, sizeof(cl_mem), &(rhs_col_buff));
+	kernel_.setArg(0 , lhs_buff);
+	kernel_.setArg(1 , rhs_buff);
+	kernel_.setArg(2 , res_buff);
+	kernel_.setArg(3 , lhs_col);
+	kernel_.setArg(4 , rhs_col);
 
-    size_t work_units_per_kernel = lhs_str;
-    clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &work_units_per_kernel, NULL, 0, NULL, NULL);
-    clEnqueueReadBuffer(queue, res_buff, CL_TRUE, 0, sizeof(int) * lhs_str * rhs_col, result, 0, NULL, NULL);
+	cl::NDRange offset(0);
+	cl::NDRange global_size(lhs_str);
+	cl::NDRange local_size(1);
 
-    clReleaseMemObject(mat_lhs_buff);
-    clReleaseMemObject(mat_rhs_buff);
-    clReleaseMemObject(lhs_col_buff);
-    clReleaseMemObject(rhs_col_buff);
-    clReleaseMemObject(res_buff);
-    clReleaseKernel(kernel);
-    clReleaseCommandQueue(queue);
-    clReleaseProgram(program);
-    clReleaseContext(context);
+	cl::CommandQueue queue_(context_ , device_ , CL_QUEUE_PROFILING_ENABLE);
+	queue_.enqueueNDRangeKernel(kernel_ , offset , global_size , local_size , NULL , NULL);
+	queue_.enqueueReadBuffer(res_buff , CL_TRUE , 0 , sizeof(int) * lhs_str * rhs_col , result , NULL , NULL);
 }
 
 void matrix_GPU::matrix_GPU_product(matrix::Matrix& lhs , matrix::Matrix& rhs , matrix::Matrix& result)
 {
 	set_device();
+	context_ = cl::Context(device_);
 	build_program();
 
 	int lhs_col = lhs.get_num_col();
 	int lhs_str = lhs.get_num_str();
 	int rhs_col = rhs.get_num_col();
 
-	int* res = new int[rhs_col * lhs_col];
+	int* res = new int[rhs_col * lhs_str];
 
 	int* lhs_per = new int[lhs_col * lhs_str];
 	for (int i = 0 ; i < lhs_str ; ++i)

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdio.h>
-#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
-#include <CL/cl.h>
+#include <CL/cl.hpp>
+#include <fstream>
 #include "Matrix_lib/Matrix.h"
 
 #define PROGRAM_FILE "matrix_mult_true.cl"
@@ -13,11 +13,10 @@ public:
 	void matrix_GPU_product(matrix::Matrix& lhs , matrix::Matrix& rhs , matrix::Matrix& result);
 
 private:
-    cl_device_id device;
-    cl_context context;
-    cl_command_queue queue;
-    cl_program program;
-    cl_kernel kernel;
+	cl::Device device_;
+	cl::Context context_;
+	cl::Program program_;
+	cl::Kernel kernel_;
 
 	void set_device();
 	void build_program();
