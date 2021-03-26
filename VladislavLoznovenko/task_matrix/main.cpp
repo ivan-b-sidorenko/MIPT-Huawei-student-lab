@@ -1,9 +1,9 @@
 #include "matrix_mult.h"
 #include "Matrix_products.h"
 
-#define RES_STR 1000
-#define RES_COL 1000
-#define MID 1000
+#define RES_STR 1001
+#define RES_COL 1002
+#define MID 1003
 
 using namespace matrix;
 
