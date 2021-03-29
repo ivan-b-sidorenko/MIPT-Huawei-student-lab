@@ -1,3 +1,4 @@
+#pragma once
 #include "../Matrix_h/Matrix_h.h"
 
 class Chanel final

@@ -1,3 +1,4 @@
+#pragma once
 #include "../Chanel_h/Chanel_h.h"
 
 class Tensor4 final
