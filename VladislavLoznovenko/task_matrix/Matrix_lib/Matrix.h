@@ -1,5 +1,6 @@
 #include <iostream>
 #include <chrono>
+#include <vector>
 #include <thread>
 #include <ratio>
 #include <immintrin.h>
@@ -29,5 +30,7 @@ public:
 	bool operator==(const Matrix& rhs);
 	int* operator[](const int rhs) const {return mrx[rhs];};
 };
+
+	std::ostream& operator<<(std::ostream& out , const Matrix& rhs);
 
 };
