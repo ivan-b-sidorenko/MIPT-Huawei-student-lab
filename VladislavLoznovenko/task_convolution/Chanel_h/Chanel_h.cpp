@@ -1,5 +1,7 @@
 #include "Chanel_h.h"
 
+namespace Tensor{
+
 Chanel::Chanel(int num , int num_h , int num_w)
 {
 	high = num_h;
@@ -88,3 +90,5 @@ std::ostream& operator<<(std::ostream& out , const Chanel& rhs)
 
 	return out;
 }
+
+};

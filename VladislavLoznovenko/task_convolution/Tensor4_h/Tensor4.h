@@ -1,6 +1,8 @@
 #pragma once
 #include "../Chanel_h/Chanel_h.h"
 
+namespace Tensor{
+
 class Tensor4 final
 {
 private:
@@ -25,4 +27,6 @@ public:
 	bool operator==(const Tensor4& rhs);
 	Chanel& operator[](const int rhs) {return butches[rhs];};
 	friend std::ostream& operator<<(std::ostream& out , Tensor4& rhs);
+};
+
 };

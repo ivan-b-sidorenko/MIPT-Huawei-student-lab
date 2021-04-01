@@ -1,5 +1,7 @@
 #include "Tensor4.h"
 
+namespace Tensor{
+
 Tensor4::Tensor4(int num_b , int num_m , int num_h , int num_w)
 {
 	num_butch = num_b;
@@ -102,3 +104,5 @@ std::ostream& operator<<(std::ostream& out , Tensor4& rhs)
 
 	return out;
 }
+
+};

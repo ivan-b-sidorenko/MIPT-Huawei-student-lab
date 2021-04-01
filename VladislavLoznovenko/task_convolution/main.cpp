@@ -4,6 +4,7 @@
 #include <ratio>
 
 using namespace matrix;
+using namespace Tensor;
 
 int main()
 {

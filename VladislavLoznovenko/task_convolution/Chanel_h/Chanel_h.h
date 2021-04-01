@@ -1,6 +1,8 @@
 #pragma once
 #include "../Matrix_h/Matrix_h.h"
 
+namespace Tensor{
+
 class Chanel final
 {
 private:
@@ -23,4 +25,6 @@ public:
 	bool operator==(const Chanel& rhs);
 	matrix::Matrix& operator[](int num) {return chanels[num];};
 	friend std::ostream& operator<<(std::ostream& out , const Chanel& rhs);
+};
+
 };
