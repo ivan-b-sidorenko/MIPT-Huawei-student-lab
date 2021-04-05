@@ -47,7 +47,7 @@ Matrix::Matrix(const Matrix& rhs)
 			mrx[i][j] = rhs[i][j];
 }
 
-Matrix::Matrix(const Matrix& rhs , int col , int str , int start_col , int start_str)
+Matrix::Matrix(const Matrix& rhs , int str , int col , int start_str , int start_col)
 {
 	num_col = col;
 	num_str = str;
