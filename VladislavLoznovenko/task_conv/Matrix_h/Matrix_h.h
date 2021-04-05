@@ -14,8 +14,8 @@ private:
 	int num_str;
 	float** mrx;
 public:
-	Matrix(int col , int str);
-	Matrix(int col , int str , int mod);
+	Matrix(int str , int col);
+	Matrix(int str , int col , int mod);
 	Matrix(const Matrix& rhs , int col , int str , int start_col , int start_str);
 	Matrix(const Matrix& rhs);
 	~Matrix();
