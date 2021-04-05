@@ -27,7 +27,7 @@ void make_chan(Chanel& chanel , Chanel& kernel , matrix::Matrix& result)
 		for (int i = 0 ; i < res_per.get_num_str() ; ++i)
 			for (int j = 0 ; j < res_per.get_num_col() ; ++j)
 			{
-				matrix::Matrix per(chanel[chan] , kernel[chan].get_num_col() , kernel[chan].get_num_str() , i , j);
+				matrix::Matrix per(chanel[chan] , kernel[chan].get_num_str() , kernel[chan].get_num_col() , i , j);
 				res_per[i][j] = elem_sum(per , kernel[chan]);
 			}
 		matrix::sum(result , res_per , result);
