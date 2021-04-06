@@ -10,7 +10,7 @@ Chanel::Chanel(int num , int num_h , int num_w)
 
 	for (int i = 0 ; i < num ; ++i)
 	{
-		chanels.push_back(matrix::Matrix(num_w , num_h));
+		chanels.push_back(matrix::Matrix(num_h , num_w));
 	}
 }
 
@@ -22,7 +22,7 @@ Chanel::Chanel(int num , int num_h , int num_w , int mod)
 
 	for (int i = 0 ; i < num ; ++i)
 	{
-		chanels.push_back(matrix::Matrix(num_w , num_h , 0));
+		chanels.push_back(matrix::Matrix(num_h , num_w , 0));
 	}
 }
 

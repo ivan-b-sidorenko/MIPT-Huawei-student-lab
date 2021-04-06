@@ -42,7 +42,7 @@ matrix::Matrix GEMM_ten(Tensor4& f_map , Tensor4& filter)
 			for (int i = 0 ; i < data_h - fil_h + 1 ; ++i)
 				for (int j = 0 ; j < data_w - fil_w + 1 ; ++j)
 
-					for (int start_h = i ; start_h < i + fil_h ; ++start_h)//chan * (data_h - fil_h + 1) * (data_w - fil_w + 1) + i * (data_w - fil_w + 1) + j (start_h - i) * (fil_w) + start_w - j
+					for (int start_h = i ; start_h < i + fil_h ; ++start_h)
 						for (int start_w = j ; start_w < j + fil_w ; ++start_w)
 							IFmap_matrix[butch * (data_h - fil_h + 1) * (data_w - fil_w + 1) + i * (data_w - fil_w + 1) + j][chan * fil_h * fil_w  + (start_h - i) * (fil_w) + start_w - j] = f_map[butch][chan][start_h][start_w];
 
@@ -71,9 +71,11 @@ Tensor4 conv_layer_fast(Tensor4& f_map , Tensor4& filter)
 
 	matrix::Matrix OFmap(IFmap.get_num_str() , fil_matrix.get_num_col());
 
-	//std::cout << IFmap << std::endl << fil_matrix;
+	//std::cout << IFmap << std::endl << fil_matrix << std::endl;
 
 	matrix::Matrix_product_fast(IFmap , fil_matrix , OFmap);
+
+	//std::cout << OFmap;
 
 	reverse_GEMM(OFmap , result);
 
