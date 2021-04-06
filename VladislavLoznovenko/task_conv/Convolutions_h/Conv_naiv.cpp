@@ -23,7 +23,7 @@ void make_chan(Chanel& chanel , Chanel& kernel , matrix::Matrix& result)
 {
 	for (int chan = 0 ; chan < kernel.get_num_mrx() ; ++chan)
 	{
-		matrix::Matrix res_per(result.get_num_col() , result.get_num_str());
+		matrix::Matrix res_per(result.get_num_str() , result.get_num_col());
 		for (int i = 0 ; i < res_per.get_num_str() ; ++i)
 			for (int j = 0 ; j < res_per.get_num_col() ; ++j)
 			{
