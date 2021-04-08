@@ -10,7 +10,7 @@ using std::cout;
 using std::endl;
 using std::vector;
 
-using namespace MX;
+using namespace MXL;
 
 using Func = Matrix<double> (*) (const Matrix<double> &, const Matrix<double> &);
 

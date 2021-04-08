@@ -8,5 +8,6 @@ set(CMAKE_CXX_FLAGS "-pthread")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O0")
 
+include_directories(../matrix)
 
 add_executable(matr main.cc)

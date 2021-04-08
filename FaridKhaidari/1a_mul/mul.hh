@@ -6,11 +6,11 @@
 #include <typeinfo>
 #include <stdexcept>
 
-#include "matrix.hh"
+#include "matrix_light.hh"
 
 namespace MUL
 {
-    using namespace MX;
+    using namespace MXL;
 
     template <typename DataT>
     Matrix<DataT> trivial( const Matrix<DataT> & lhs, const Matrix<DataT> & rhs );
@@ -403,7 +403,7 @@ namespace MUL
         Matrix<DataT> tmp{lhs_r, rhs_c};
         std::mutex mx_mx;
 
-        auto rhs_t = MX::transpose(rhs);
+        auto rhs_t = MXL::transpose(rhs);
 
         auto f = [&](size_t c)
         {
