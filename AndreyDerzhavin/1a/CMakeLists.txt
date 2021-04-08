@@ -27,3 +27,7 @@ target_compile_options(${EX_NAME} PRIVATE -g -O0)
 # Required libraries
 target_link_libraries(${EX_NAME} pthread OpenCL)
 
+target_compile_definitions(${EX_NAME} PRIVATE
+  __CL_ENABLE_EXCEPTIONS
+  CL_TARGET_OPENCL_VERSION=220
+)

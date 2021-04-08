@@ -5,6 +5,7 @@
 
 #include "mul.hh"
 #include "mul_th.hh"
+#include "mul_ocl.hh"
 
 using std::string;
 using std::vector;

@@ -16,7 +16,7 @@ namespace linal
   class Matrix final
   {
   private:
-    T **matr_;
+    T *matr_;
     size_t rows_, cols_;
     static ldbl threshold;
     // emplace function type
