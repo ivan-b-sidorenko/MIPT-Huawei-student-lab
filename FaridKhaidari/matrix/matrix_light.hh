@@ -10,6 +10,16 @@
 namespace MXL
 {
   template<typename T>
+  bool is_zero(const T & val)
+  {return (val == 0);}
+
+  template<>
+  bool is_zero(const double & val)
+  {
+    return ((val - 1e-6) < 0);
+  }
+
+  template<typename T>
   class Matrix
   {
   private:
@@ -60,8 +70,8 @@ namespace MXL
   template <typename T>
   Matrix<T> transpose(const Matrix<T> matr);
 
-  template <typename DataT>
-  Matrix<DataT> operator*( const Matrix<DataT> & lhs, const Matrix<DataT> & rhs );
+  template <typename T>
+  Matrix<T> operator*( const Matrix<T> & lhs, const Matrix<T> & rhs );
 
 
 
@@ -77,10 +87,10 @@ namespace MXL
   template <typename T>
   Matrix<T>::Matrix(size_t rows /* = 0*/, size_t cols /* = 0 */) : rows_(rows), cols_(cols)
   {
-    arr_ = new T* [rows_];
+    arr_ = new T* [rows_] {};
 
     for (size_t i = 0; i < rows_; ++i)
-      arr_[i] = new T [cols_];
+      arr_[i] = new T [cols_] {};
   }
 
   template <typename T>
@@ -190,8 +200,11 @@ namespace MXL
 
     for (size_t i = 0; i < rows_; ++i)
       for (size_t j = 0; j < cols_; ++j)
-        if (arr_[i][j] != matr[i][j])
+        if (!is_zero(arr_[i][j] - matr[i][j]))
+        {
+          std::cerr << std::endl << "(i, j) = (" << i << ", " << j << ")" << std::endl;
           return false;
+        }
     
     return true;
   }
@@ -213,14 +226,14 @@ namespace MXL
     return tmp.transpose();
   }
   
-  template <typename DataT>
-  Matrix<DataT> operator*( const Matrix<DataT> & lhs, const Matrix<DataT> & rhs )
+  template <typename T>
+  Matrix<T> operator*( const Matrix<T> & lhs, const Matrix<T> & rhs )
   {
     size_t lhs_r = lhs.rows(),
            lhs_c = lhs.cols(),
            rhs_c = rhs.cols();
     
-    Matrix<DataT> tmp{lhs_r, rhs_c};
+    Matrix<T> tmp{lhs_r, rhs_c};
 
     for (size_t i = 0; i < lhs_r; ++i)
       for (size_t j = 0; j < rhs_c; ++j)
@@ -228,5 +241,32 @@ namespace MXL
           tmp[i][j] += lhs[i][k] * rhs[k][j];
 
     return tmp;
+  }
+
+  template <typename T> std::ostream &operator<<(std::ostream &ost, const Matrix<T> &matr)
+  {
+    ost << "   | ";
+    for (size_t i = 0, cols = matr.cols(); i < cols; ++i)
+      ost << std::setw(4) << i;
+
+    ost << std::endl;
+
+    ost << "   +-";
+    for (size_t i = 0, cols = matr.cols(); i < cols; ++i)
+      ost << "----";
+
+    ost << std::endl;
+
+    for (size_t i = 0, cols = matr.cols(), rows = matr.rows(); i < rows; ++i)
+    {
+      ost << std::setw(3) << i << "| ";
+
+      for (size_t j = 0; j < cols; ++j)
+        ost << std::setw(4) << matr[i][j] << ";";
+
+      ost << "|" << std::endl;
+    }
+
+    return ost;
   }
 }

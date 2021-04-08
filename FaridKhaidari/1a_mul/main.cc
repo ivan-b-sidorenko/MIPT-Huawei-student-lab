@@ -67,9 +67,9 @@ int main( )
   Matrix<double> m2{rows2, cols2, raw2.begin(), raw2.end()};
 
   assert(cols1 == rows2);
-  Matrix<long double> res{rows1, cols2};
+  Matrix<double> res{rows1, cols2};
 
-  vector<Func> functions{MUL::trivial, 
+  vector<Func> functions{ MUL::trivial, 
                           MUL::transpose,
 
                           MUL::trivial_cycle2x,
@@ -84,9 +84,17 @@ int main( )
                           MUL::trivial_threads,
                           MUL::transpose_threads,
                           
-                          MUL::trivial_threads2x};
+                          MUL::trivial_threads2x,
+                          MUL::transpose_threads2x,
+
+                          MUL::trivial_threads4x,
+                          MUL::transpose_threads4x,
+
+                          MUL::trivial_threads8x,
+                          MUL::transpose_threads8x};
 
   auto mul = m1 * m2;
+  //std::cout << mul << std::endl;
   for (auto && func : functions)
     speed_test(m1, m2, mul, func);
 
