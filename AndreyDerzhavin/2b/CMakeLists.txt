@@ -8,6 +8,8 @@ set(EX_NAME ${PROJECT_NAME}.o)
 set(WARN_OPTIONS 
   -Wall -Wextra -Wunused -Wpedantic # classic
   -Wno-old-style-cast
+  -Weffc++
+  -Wswitch-enum
   -Wunreachable-code)
 
 add_executable(${EX_NAME} main.cc)
