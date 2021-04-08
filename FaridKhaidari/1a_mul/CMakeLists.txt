@@ -9,5 +9,6 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O0")
 
 include_directories(../matrix)
+include_directories(mul_funcs)
 
 add_executable(matr main.cc)

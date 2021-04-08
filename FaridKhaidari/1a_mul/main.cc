@@ -3,7 +3,8 @@
 #include <cstdio>
 #include <chrono>
 
-#include "mul.hh"
+#include "just.hh"
+#include "thrd.hh"
 
 using std::cin;
 using std::cout;
@@ -94,7 +95,7 @@ int main( )
                           MUL::transpose_threads8x};
 
   auto mul = m1 * m2;
-  //std::cout << mul << std::endl;
+
   for (auto && func : functions)
     speed_test(m1, m2, mul, func);
 
