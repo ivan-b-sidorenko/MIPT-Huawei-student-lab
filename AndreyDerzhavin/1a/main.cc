@@ -2,6 +2,7 @@
 #include <chrono>
 #include <vector>
 #include <string>
+#include <limits>
 
 #include "mul.hh"
 #include "mul_th.hh"
@@ -24,6 +25,8 @@ struct name_n_name final
   std::string name_to_print;
 };
 
+linal::ldbl naive_ms, min_ms = std::numeric_limits<linal::ldbl>::max(), min_cl_ms = std::numeric_limits<linal::ldbl>::max();
+
 Mul::Mat Measure( const Mul::Mat &lhs, const Mul::Mat &rhs, const func_n_name &fname )
 {
   std::cout << fname.name << ":" << std::endl;
@@ -31,9 +34,13 @@ Mul::Mat Measure( const Mul::Mat &lhs, const Mul::Mat &rhs, const func_n_name &f
 
   auto answ = fname.func(lhs, rhs);
 
-  auto res = timer.elapsed_ms();
+  auto res = static_cast<linal::ldbl>(timer.elapsed_mcs()) / 1'000;
   std::cout << res << " ms" << std::endl;
 
+  if (fname.func == Mul::Mul_Naive)
+    naive_ms = res;
+
+  min_ms = std::min(min_ms, res);
   return answ;
 }
 
@@ -51,14 +58,17 @@ Mul::Mat Run( const Mul::Mat &lhs, const Mul::Mat &rhs, const name_n_name &names
 
     auto answ = driver.MatMul(lhs, rhs, names.func_name, elapsed_ns);
 
-    auto res = timer.elapsed_mcs();
+    auto res = static_cast<linal::ldbl>(timer.elapsed_mcs()) / 1'000;
 
+    auto cl_res = static_cast<linal::ldbl>(elapsed_ns) / 1'000'000;
     std::cout << std::endl;
     std::cout << "  OpenCL outer time:" << std::endl;
-    std::cout << "  " << res << "mcs" << std::endl << std::endl;
+    std::cout << "  " << res << " ms" << std::endl << std::endl;
     std::cout << "  OpenCL inner time:" << std::endl;
-    std::cout << "  " << static_cast<linal::ldbl>(elapsed_ns) / 1'000 << "mcs" << std::endl << std::endl;
+    std::cout << "  " << cl_res << " ms" << std::endl << std::endl;
 
+    min_ms = std::min(min_ms, res);
+    min_cl_ms = std::min(min_ms, cl_res);
     return answ;
   }
   catch ( std::runtime_error &err )
@@ -189,6 +199,10 @@ int main( void )
     }
   }
 
+  std::cout << "***************************************************************************" << std::endl << std::endl;
+
+  std::cout << "Win from naive in " << naive_ms << " / " << min_ms << " = " << naive_ms / min_ms << " times" << std::endl;
+  std::cout << "Win from naive (includes inner OpenCL time) in " << naive_ms << " / " << min_cl_ms << " = " << naive_ms / min_cl_ms << " times" << std::endl;
 
   return 0;
 }
