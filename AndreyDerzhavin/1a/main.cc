@@ -67,6 +67,7 @@ int main( void )
     {Mul::Mul_prom8x_t_ptmp, "Prom 8x transpose tmp common var"},
     {Mul::Mul_prom16x_ptmp, "Prom 16x tmp common var"},
     {Mul::Mul_prom16x_t_ptmp, "Prom 16x transpose tmp common var"},
+    //************************* THREADS ***************************
     {Mul::Mul_th<2>, "2 Threads"},
     {Mul::Mul_th<4>, "4 Threads"},
     {Mul::Mul_th<8>, "8 Threads"},
@@ -110,7 +111,9 @@ int main( void )
     {Mul::Mul_th_t_ptmp_prom16x<2>, "2 Threads transopse tmp common var prom 16"},
     {Mul::Mul_th_t_ptmp_prom16x<4>, "4 Threads transopse tmp common var prom 16"},
     {Mul::Mul_th_t_ptmp_prom16x<8>, "8 Threads transopse tmp common var prom 16"},
-    {Mul::Mul_th_t_ptmp_prom16x<16>, "16 Threads transopse tmp common var prom 16"}
+    {Mul::Mul_th_t_ptmp_prom16x<16>, "16 Threads transopse tmp common var prom 16"},
+    //***********                  HERE GOES OPENCL     ****************************
+    {Mul::CL_Naive, "OpenCL naive"}
   };
 
   for (auto &&f : funcs)

@@ -1,6 +1,6 @@
 R"(
 kernel void Naive( const global float *A, const global float *B, global float *C, 
-                   const uint C_rw, const uint C_cl, const uint AB_com_sz)
+                   const uint C_rw, const uint AB_com_sz)
 {
   const int globalRow = get_global_id(0);
   const int globalCol = get_global_id(1);

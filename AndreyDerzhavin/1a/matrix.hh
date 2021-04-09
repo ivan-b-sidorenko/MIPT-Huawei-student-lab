@@ -16,7 +16,7 @@ namespace linal
   class Matrix final
   {
   private:
-    T *matr_;
+    T **matr_;
     size_t rows_, cols_;
     static ldbl threshold;
     // emplace function type
@@ -108,11 +108,14 @@ namespace linal
 
   template <typename T>
   std::istream &InputQuadr( std::istream &ist, Matrix<T> &matr );
+
+  template <typename InputIt, typename T>
+  void MatToIt( InputIt beg, InputIt end, const Matrix<T> &mat );
 }
 
 namespace Mul
 {
-  using type = int;
+  using type = float;
   using Mat = linal::Matrix<type>;
 }
 
@@ -394,6 +397,14 @@ std::istream &linal::InputQuadr( std::istream &ist, Matrix<T> &matr )
   return ist;
 }
 
+template <typename InputIt, typename T>
+void linal::MatToIt( InputIt beg, InputIt end, const Matrix<T> &mat )
+{
+  size_t i = 0, size = mat.getCols() * mat.getRows(), cols = mat.getCols();
+
+  for (InputIt iit = beg; iit != end && i < size; ++i, ++iit)
+    *iit = mat[i / cols][i % cols];
+}
 
 #endif //MATRIX_MATRIX_HPP
 
