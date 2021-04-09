@@ -11,6 +11,8 @@ namespace linal
     std::size_t height_, width_;
     std::vector<Mat> channels_;
   public:
+    Batch( void ) = default;
+
     Batch( std::size_t ch_size, std::size_t height, std::size_t width, int val = {} ) 
           : Batch(ch_size, height, width, [val]( std::size_t, std::size_t ){return val;})
     {}

@@ -12,8 +12,10 @@ namespace linal
     std::size_t ch_size_, height_, width_;
     std::vector<Batch> batches_;
   public:
-    Tensor( std::size_t bh_size = 0, std::size_t ch_size = 0, std::size_t height = 0, 
-            std::size_t width = 0, int val = {} ) 
+    Tensor( void ) = default;
+
+    Tensor( std::size_t bh_size, std::size_t ch_size, std::size_t height, 
+            std::size_t width, int val = {} ) 
           : Tensor(bh_size, ch_size, height, width, [val]( std::size_t, std::size_t ){return val;})
     {}
 

@@ -13,7 +13,8 @@ namespace linal
     std::vector<Mat> layers_;
   public:
 
-    Kernel( size_t size = 0, size_t rows = 0, size_t cols = 0, int val = {} ) : Kernel(size, rows, cols, [val](size_t, size_t){ return val; })
+    Kernel( void ) = default;
+    Kernel( size_t size, size_t rows, size_t cols, int val = {} ) : Kernel(size, rows, cols, [val](size_t, size_t){ return val; })
     {
     }
 
@@ -88,7 +89,7 @@ namespace linal
     {
       for (size_t i = 0, endi = layers_.size(); i < endi; ++i)
       {
-        auto two_walk = [walk, i](size_t j, size_t k) { return walk(i, j, k); };
+        auto two_walk = [walk, i](size_t j, size_t k) { return walk(  i, j, k); };
         layers_[i].Walker(two_walk);
       }
     }
