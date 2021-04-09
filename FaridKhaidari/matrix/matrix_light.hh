@@ -19,7 +19,13 @@ namespace MXL
   template<>
   bool is_zero(const double & val)
   {
-    return ((val - 1e-6) < 0);
+    return val < 1e-12;
+  }
+
+  template<>
+  bool is_zero(const float & val)
+  {
+    return val < 1e-12;
   }
 
   template<typename T>
@@ -61,6 +67,7 @@ namespace MXL
     /* getters and setters for size */
     size_t cols( ) const;
     size_t rows( ) const;
+    T ** arr( ) const;
 
     /* tr */
     Matrix &transpose() &;
@@ -192,7 +199,8 @@ namespace MXL
   Matrix<T> & Matrix<T>::operator=(const Matrix &orig)
   {
     Matrix<T> tmp{orig};
-    swap(orig);
+    swap(tmp);
+    return *this;
   }
 
   template <typename T>
@@ -218,11 +226,14 @@ namespace MXL
     return !(operator==(matr));
   }
 
-
-
-
-
   template <typename T>
+  T ** Matrix<T>::arr( ) const
+  {
+    return arr_;
+  }
+
+
+    template <typename T>
   Matrix<T> transpose(const Matrix<T> matr)
   {
     Matrix<T> tmp{matr};
@@ -250,15 +261,15 @@ namespace MXL
   {
     ost << "   | ";
     for (size_t i = 0, cols = matr.cols(); i < cols; ++i)
-      ost << std::setw(4) << i;
+      ost << std::setw(5) << i;
 
-    ost << std::endl;
+    ost << "|" << std::endl;
 
     ost << "   +-";
     for (size_t i = 0, cols = matr.cols(); i < cols; ++i)
-      ost << "----";
+      ost << "-----";
 
-    ost << std::endl;
+    ost << "+" << std::endl;
 
     for (size_t i = 0, cols = matr.cols(), rows = matr.rows(); i < rows; ++i)
     {
