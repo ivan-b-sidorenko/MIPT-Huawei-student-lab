@@ -4,11 +4,16 @@
 #include <iostream>
 #include <cmath>
 #include <cassert>
+#include <vector>
 
 
 namespace linal
 {
   using ldbl = long double;
+  template <typename T>
+  class Matrix;
+
+  using Mat = Matrix<int>;
 
   constexpr ldbl MAT_THRESHOLD = 1e-10;
 

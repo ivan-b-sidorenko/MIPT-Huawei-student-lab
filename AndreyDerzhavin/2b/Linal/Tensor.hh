@@ -2,6 +2,7 @@
 #define __TENSOR_H__
 
 #include "Batch.hh"
+#include "Kernel.hh"
 
 namespace linal
 {
@@ -62,7 +63,6 @@ namespace linal
     std::size_t get_ch_size ( void ) const { return ch_size_;         }
     std::size_t get_height  ( void ) const { return height_;          }
     std::size_t get_width   ( void ) const { return width_;           }
-    
 
     ~Tensor( void ) = default;
   };

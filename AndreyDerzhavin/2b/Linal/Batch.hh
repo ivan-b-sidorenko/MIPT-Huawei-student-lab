@@ -1,7 +1,6 @@
 #ifndef __BATCH_H__
 #define __BATCH_H__
 
-#include <vector>
 #include "matrix.hh"
 
 namespace linal
@@ -10,7 +9,7 @@ namespace linal
   {
   private:
     std::size_t height_, width_;
-    std::vector<Matrix<int>> channels_;
+    std::vector<Mat> channels_;
   public:
     Batch( std::size_t ch_size, std::size_t height, std::size_t width, int val = {} ) 
           : Batch(ch_size, height, width, [val]( std::size_t, std::size_t ){return val;})
@@ -18,7 +17,7 @@ namespace linal
 
     template <typename empl_func>
     Batch( std::size_t ch_size, std::size_t height, std::size_t width, empl_func fn )
-          : height_(height), width_(width), channels_(ch_size, Matrix<int>{height, width, fn})
+          : height_(height), width_(width), channels_(ch_size, Mat{height, width, fn})
     {}
 
     Batch( const Batch &rhs ) = default;
