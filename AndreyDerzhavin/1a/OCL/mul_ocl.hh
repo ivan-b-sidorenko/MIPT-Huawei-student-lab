@@ -29,6 +29,8 @@ namespace Mul
   private:
     bool select_device( void );
 
+    bool kernel_exec( void );
+
     static const char *err_what(cl_int err_code);
   };
 

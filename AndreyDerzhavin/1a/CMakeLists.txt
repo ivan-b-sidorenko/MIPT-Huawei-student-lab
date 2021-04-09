@@ -15,7 +15,7 @@ set(WARN_OPTIONS
 find_package(OpenCL REQUIRED)
 
 
-add_executable(${EX_NAME} main.cc mul_ocl.cc ocl.cc)
+add_executable(${EX_NAME} main.cc ./OCL/mul_ocl.cc ./OCL/ocl.cc)
 
 # Specify standard
 target_compile_features(${EX_NAME} PRIVATE cxx_std_20)
@@ -23,6 +23,8 @@ target_compile_features(${EX_NAME} PRIVATE cxx_std_20)
 # Specify warning options
 target_compile_options(${EX_NAME} PRIVATE ${WARN_OPTIONS})
 target_compile_options(${EX_NAME} PRIVATE -g -O0)
+
+target_include_directories(${EX_NAME} PRIVATE Just Matrix OCL Threads)
 
 # Required libraries
 target_link_libraries(${EX_NAME} pthread OpenCL)

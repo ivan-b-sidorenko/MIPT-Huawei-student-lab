@@ -63,7 +63,8 @@ namespace Mul
       kernel.setArg(3, static_cast<unsigned>(A.getRows()));
       kernel.setArg(4, static_cast<unsigned>(A.getCols()));
 
-      if (queue_.enqueueNDRangeKernel(kernel, cl::NullRange, {A.getRows(), B.getCols()}) != CL_SUCCESS)
+      
+      if (queue_.enqueueNDRangeKernel(kernel, cl::NullRange, {A.getRows(), B.getCols()}, cl::NullRange, nullptr, &event) != CL_SUCCESS)
         throw std::runtime_error{"Failed execution of kernel"};
     }
     catch ( cl::Error &err )
