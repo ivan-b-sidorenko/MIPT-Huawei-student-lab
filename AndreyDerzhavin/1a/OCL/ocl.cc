@@ -9,7 +9,7 @@ namespace Mul
     //work_group_size_ = device_.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>();
 
     context_ = cl::Context({device_});
-    queue_ = cl::CommandQueue(context_, device_);
+    queue_ = cl::CommandQueue(context_, device_, CL_QUEUE_PROFILING_ENABLE);
   }
 
   void Driver::build( void )
