@@ -6,6 +6,7 @@
 #include "mul.hh"
 #include "mul_th.hh"
 #include "mul_ocl.hh"
+#include "Timer.hh"
 
 using std::string;
 using std::vector;
@@ -26,13 +27,11 @@ struct name_n_name final
 Mul::Mat Measure( const Mul::Mat &lhs, const Mul::Mat &rhs, const func_n_name &fname )
 {
   std::cout << fname.name << ":" << std::endl;
-  auto begin = std::chrono::high_resolution_clock::now();
+  timer::Timer timer;
 
   auto answ = fname.func(lhs, rhs);
 
-  auto end = std::chrono::high_resolution_clock::now();
-
-  auto res = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+  auto res = timer.elapsed_ms();
   std::cout << res << " ms" << std::endl;
 
   return answ;
@@ -48,10 +47,17 @@ Mul::Mat Run( const Mul::Mat &lhs, const Mul::Mat &rhs, const name_n_name &names
     driver.build();
 
     cl_ulong elapsed_ns;
+    timer::Timer timer;
 
     auto answ = driver.MatMul(lhs, rhs, names.func_name, elapsed_ns);
 
-    std::cout << elapsed_ns / 1'000'000 << "ms" << std::endl;
+    auto res = timer.elapsed_mcs();
+
+    std::cout << std::endl;
+    std::cout << "  OpenCL outer time:" << std::endl;
+    std::cout << "  " << res << "mcs" << std::endl << std::endl;
+    std::cout << "  OpenCL inner time:" << std::endl;
+    std::cout << "  " << static_cast<linal::ldbl>(elapsed_ns) / 1'000 << "mcs" << std::endl << std::endl;
 
     return answ;
   }
