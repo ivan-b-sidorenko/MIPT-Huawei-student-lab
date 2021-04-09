@@ -31,7 +31,10 @@ int main( void )
 
   std::vector<func_n_name> fnames = 
   {
-    {Conv::Naive, "Naive"}
+    {Conv::Naive, "Naive"},
+    {Conv::Prom2x, "Prom 2x"},
+    {Conv::Prom4x, "Prom 4x"},
+    {Conv::Prom4x_tmp_var, "Prom 4x with temp vars"}
   };
 
   for (auto &&fname : fnames)
@@ -42,6 +45,7 @@ int main( void )
       std::cout << "Test passed successfully." << std::endl;
     else 
       std::cout << "Test failed." << std::endl;
+    std::cout << std::endl;
   }
   return 0;
 }
