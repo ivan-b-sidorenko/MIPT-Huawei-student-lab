@@ -92,7 +92,7 @@ int main( void )
   if (mat1.getCols() != mat2.getRows())
   {
     std::cout << "Incompatible matrix sizes" << std::endl;
-    return 1;
+    return -1;
   }
 
 
