@@ -27,7 +27,7 @@ namespace linal
     Tensor( const Tensor &rhs ) = default;
     Tensor &operator =( const Tensor &rhs ) = default;
 
-    Tensor( Tensor &&rhs ) : batches_(std::move(rhs.batches_))
+    Tensor( Tensor &&rhs ) : ch_size_(rhs.ch_size_), height_(rhs.height_), width_(rhs.width_), batches_(std::move(rhs.batches_))
     {
       rhs.batches_.clear();
     }
@@ -36,7 +36,10 @@ namespace linal
     {
       Tensor tmp = std::move(rhs);
 
-      std::swap(tmp, *this);
+      std::swap(tmp.batches_, batches_);
+      std::swap(ch_size_, tmp.ch_size_);
+      std::swap(height_, tmp.height_);
+      std::swap(width_, tmp.width_);
 
       return *this;
     }
@@ -59,6 +62,19 @@ namespace linal
       return batches_[i];
     }
 
+    bool IsEq( const Tensor &ten ) const
+    {
+      if (batches_.size() != ten.batches_.size() || ch_size_ != ten.ch_size_ || height_ != ten.height_ || width_ != ten.width_)
+        return false;
+
+      for (size_t i = 0; i < batches_.size(); ++i)
+        for (size_t j = 0; j < ch_size_; ++j)
+          if (batches_[i][j] != ten.batches_[i][j])
+            return false;
+
+      return true;
+    }
+
     std::size_t get_bat_size( void ) const { return batches_.size();  }
     std::size_t get_ch_size ( void ) const { return ch_size_;         }
     std::size_t get_height  ( void ) const { return height_;          }
@@ -69,17 +85,16 @@ namespace linal
       size_t bhs;
       ist >> bhs >> ch_size_ >> height_ >> width_;
 
-      Tensor tmp = {bhs, ch_size_, height_, width_, 
-      [&ist](size_t, size_t)
+      Tensor tmp = {bhs, ch_size_, height_, width_, 0};
+      tmp.Walker([&ist](size_t, size_t, size_t, size_t)
       {
         int val;
         ist >> val;
 
         return val;
-      }
-      };
+      });
 
-      std::swap(tmp, *this);
+      std::swap(*this, tmp);
 
       return ist;
     }
@@ -109,6 +124,16 @@ namespace linal
 
     ~Tensor( void ) = default;
   };
+
+  bool operator ==( const Tensor &rhs, const Tensor &lhs )
+  {
+    return rhs.IsEq(lhs);
+  }
+
+  bool operator !=( const Tensor &rhs, const Tensor &lhs )
+  {
+    return !rhs.IsEq(lhs);
+  }
 }
 
 std::istream &operator >>( std::istream &ist, linal::Tensor &tensor )

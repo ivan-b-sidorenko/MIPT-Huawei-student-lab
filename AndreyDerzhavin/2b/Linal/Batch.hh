@@ -23,7 +23,7 @@ namespace linal
     Batch( const Batch &rhs ) = default;
     Batch &operator =( const Batch &rhs ) = default;
 
-    Batch( Batch &&rhs ) : channels_(std::move(rhs.channels_))
+    Batch( Batch &&rhs ) : height_(rhs.height_), width_(rhs.width_), channels_(std::move(rhs.channels_))
     {
       rhs.channels_.clear();
     }

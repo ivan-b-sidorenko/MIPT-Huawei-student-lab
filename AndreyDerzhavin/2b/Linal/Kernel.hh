@@ -24,6 +24,22 @@ namespace linal
 
     Kernel( const Kernel & ) = default;
     Kernel &operator =( const Kernel & ) = default;
+    
+    Kernel( Kernel &&ker ) : rows_(ker.rows_), cols_(ker.cols_), layers_(std::move(ker.layers_))
+    {
+      ker.layers_.clear();
+    }
+
+    Kernel &operator =( Kernel &&ker )
+    {
+      Kernel tmp = std::move(ker);
+
+      std::swap(rows_, tmp.rows_);
+      std::swap(cols_, tmp.cols_);
+      std::swap(layers_, tmp.layers_);
+
+      return *this;
+    }
 
     Mat &operator []( size_t i )
     {
@@ -49,17 +65,18 @@ namespace linal
       size_t chs;
       ist >> chs >> rows_ >> cols_;
 
-      Kernel tmp = {chs, rows_, cols_, 
-      [&ist](size_t, size_t)
+      Kernel tmp = {chs, rows_, cols_, 0};
+
+      tmp.Walker([&ist](size_t, size_t, size_t)
       {
         int val;
         ist >> val;
 
         return val;
       }
-      };
+      );
 
-      std::swap(tmp, *this);
+      std::swap(*this, tmp);
 
       return ist;
     }
