@@ -17,6 +17,12 @@ struct func_n_name final
   string name;
 };
 
+struct name_n_name final
+{
+  std::string func_name;
+  std::string name_to_print;
+};
+
 Mul::Mat Measure( const Mul::Mat &lhs, const Mul::Mat &rhs, const func_n_name &fname )
 {
   std::cout << fname.name << ":" << std::endl;
@@ -30,6 +36,32 @@ Mul::Mat Measure( const Mul::Mat &lhs, const Mul::Mat &rhs, const func_n_name &f
   std::cout << res << " ms" << std::endl;
 
   return answ;
+}
+
+Mul::Mat Run( const Mul::Mat &lhs, const Mul::Mat &rhs, const name_n_name &names )
+{
+  std::cout << names.name_to_print << ":" << std::endl;
+
+  try 
+  {
+    Mul::Driver driver;
+    driver.build();
+
+    cl_ulong elapsed_ns;
+
+    auto answ = driver.MatMul(lhs, rhs, names.func_name, elapsed_ns);
+
+    std::cout << elapsed_ns / 1'000'000 << "ms" << std::endl;
+
+    return answ;
+  }
+  catch ( std::runtime_error &err )
+  {
+    std::cerr << "Error occured in " << names.func_name << std::endl;
+    std::cerr << err.what() << std::endl;
+  }
+
+  return {};
 }
 
 int main( void )
@@ -111,14 +143,35 @@ int main( void )
     {Mul::Mul_th_t_ptmp_prom16x<2>, "2 Threads transopse tmp common var prom 16"},
     {Mul::Mul_th_t_ptmp_prom16x<4>, "4 Threads transopse tmp common var prom 16"},
     {Mul::Mul_th_t_ptmp_prom16x<8>, "8 Threads transopse tmp common var prom 16"},
-    {Mul::Mul_th_t_ptmp_prom16x<16>, "16 Threads transopse tmp common var prom 16"},
-    //***********                  HERE GOES OPENCL     ****************************
-    {Mul::CL_Naive, "OpenCL naive"}
+    {Mul::Mul_th_t_ptmp_prom16x<16>, "16 Threads transopse tmp common var prom 16"}
+  };
+
+
+  //***********                  HERE GOES OPENCL     ****************************
+  std::vector<name_n_name> cl_funcs = 
+  {
+    {"Naive", "OpenCL naive"}
   };
 
   for (auto &&f : funcs)
   {
     auto calc = Measure(mat1, mat2, f);
+
+    if (!answ.empty())
+    {
+      if (calc == answ)
+        std::cout << "Test successfully passed" << std::endl;
+      else
+        std::cout << "Test failed" << std::endl;
+      std::cout << std::endl;
+    }
+  }
+
+  std::cout << "*************************** HERE GOES OpenCL ****************************" << std::endl << std::endl;
+
+  for (auto &&f : cl_funcs)
+  {
+    auto calc = Run(mat1, mat2, f);
 
     if (!answ.empty())
     {

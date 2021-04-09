@@ -15,7 +15,7 @@ set(WARN_OPTIONS
 find_package(OpenCL REQUIRED)
 
 
-add_executable(${EX_NAME} main.cc ./OCL/mul_ocl.cc ./OCL/ocl.cc)
+add_executable(${EX_NAME} main.cc ./OCL/ocl.cc)
 
 # Specify standard
 target_compile_features(${EX_NAME} PRIVATE cxx_std_20)

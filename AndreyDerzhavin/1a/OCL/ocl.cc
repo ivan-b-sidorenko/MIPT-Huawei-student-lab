@@ -6,7 +6,7 @@ namespace Mul
   {
     if (!select_device())
       throw std::runtime_error{"No devices found"};
-    work_group_size_ = device_.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>();
+    //work_group_size_ = device_.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>();
 
     context_ = cl::Context({device_});
     queue_ = cl::CommandQueue(context_, device_);
@@ -33,7 +33,8 @@ namespace Mul
     }
   }
 
-  linal::Matrix<float> Driver::MatMul( const linal::Matrix<float> &A, const linal::Matrix<float> &B, const std::string &kern_name )
+  linal::Matrix<float> Driver::MatMul( const linal::Matrix<float> &A, const linal::Matrix<float> &B, const std::string &kern_name, 
+                                       cl_ulong &nsec_elapsed )
   {
     cl::Kernel kernel{};
 
@@ -51,6 +52,9 @@ namespace Mul
     
     cl::Buffer clC_buf{context_, CL_MEM_READ_WRITE, C_buf.size() * sizeof(C_buf[0])};
 
+
+    cl::NDRange global_ranges{A.getRows(), B.getCols()};
+
     try
     {
       kernel = {prog_, kern_name.c_str()};
@@ -64,8 +68,7 @@ namespace Mul
       kernel.setArg(4, static_cast<unsigned>(A.getCols()));
 
       
-      if (queue_.enqueueNDRangeKernel(kernel, cl::NullRange, {A.getRows(), B.getCols()}, cl::NullRange, nullptr, &event) != CL_SUCCESS)
-        throw std::runtime_error{"Failed execution of kernel"};
+      nsec_elapsed = kernel_exec(kernel, global_ranges);
     }
     catch ( cl::Error &err )
     {
@@ -100,7 +103,22 @@ namespace Mul
     return false;
   }
 
-  const char *Mul::Driver::err_what( cl_int err_code )
+  cl_ulong Driver::kernel_exec( cl::Kernel &kern, const cl::NDRange &glob_ranges )
+  {
+    cl::Event event;
+
+    cl_int err = queue_.enqueueNDRangeKernel(kern, cl::NullRange, glob_ranges, cl::NullRange, nullptr, &event);
+    if (err != CL_SUCCESS)
+      throw std::runtime_error{"Error executing kernel"};
+
+    event.wait();
+
+    auto start = event.getProfilingInfo<CL_PROFILING_COMMAND_START>();
+    auto end = event.getProfilingInfo<CL_PROFILING_COMMAND_END>();
+    return end - start;
+  }
+
+  const char *Driver::err_what( cl_int err_code )
   {
     switch (err_code)
     {
