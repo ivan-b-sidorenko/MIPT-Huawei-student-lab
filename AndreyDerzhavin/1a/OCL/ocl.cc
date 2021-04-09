@@ -18,7 +18,7 @@ namespace Mul
       #include "mul.cl"
     };
 
-    cl::Program::Sources src{1, std::make_pair(src_code.c_str(), src_code.length() + 1)};
+    cl::Program::Sources src{{src_code}};
     prog_ = {context_, src};
 
     try
@@ -64,7 +64,7 @@ namespace Mul
       kernel.setArg(2, clC_buf);
 
       kernel.setArg(3, static_cast<unsigned>(A.getRows()));
-      kernel.setArg(4, static_cast<unsigned>(A.getCols()));
+      kernel.setArg(4, static_cast<unsigned>(B.getRows()));
       kernel.setArg(5, static_cast<unsigned>(B.getCols()));
       
       nsec_elapsed = kernel_exec(kernel, global_ranges);
@@ -77,7 +77,7 @@ namespace Mul
     }
 
     queue_.enqueueReadBuffer(clC_buf, CL_TRUE, 0, sizeof(C_buf[0]) * C_buf.size(), C_buf.data());
-    
+
     return {A.getRows(), B.getCols(), C_buf.begin(), C_buf.end()};
   }
 
