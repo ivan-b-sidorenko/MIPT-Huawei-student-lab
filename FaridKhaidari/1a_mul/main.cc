@@ -33,7 +33,7 @@ auto speed_test( Matrix<float> & m1,
 
 #if 0
   if (mul != res)
-    cout << "INCORRECT" << endl;
+    cout << "INCORRECT: " << endl;
 #endif
 
   cout << "    " << time << " msc" << endl;
@@ -48,30 +48,18 @@ int main( )
 
   cin >> rows1 >> cols1 >> rows2 >> cols2;
 
-  vector<float> raw1;
-  vector<float> raw2;
-
-  raw1.reserve(rows1 * cols1);
-  
-  for (int i = 0, end = rows1 * cols1; i < end; ++i)
-  {
-    float tmp;
-    cin >> tmp;
-    raw1.push_back(tmp);
-  }
-
-  raw2.reserve(rows2 * cols2);
-  for (int i = 0, end = rows2 * cols2; i < end; ++i)
-  {
-    float tmp;
-    cin >> tmp;
-    raw2.push_back(tmp);
-  }
-
-  Matrix<float> m1{rows1, cols1, raw1.begin(), raw1.end()};
-  Matrix<float> m2{rows2, cols2, raw2.begin(), raw2.end()};
-
   assert(cols1 == rows2);
+
+  Matrix<float> m1{rows1, cols1};
+  Matrix<float> m2{rows2, cols2};
+
+  for (size_t i = 0; i < rows1; ++i)
+    for (size_t j = 0; j < cols1; ++j)
+      cin >> m1[i][j];
+
+  for (size_t i = 0; i < rows2; ++i)
+    for (size_t j = 0; j < cols2; ++j)
+      cin >> m2[i][j];
 
   vector<Func> functions{ MUL::trivial, 
                           MUL::transpose,
@@ -84,8 +72,6 @@ int main( )
 
                           MUL::trivial_cycle8x,
                           MUL::transpose_cycle8x,
-
-                          MUL::intrinsics,
                           
                           MUL::trivial_threads,
                           MUL::transpose_threads,
@@ -97,7 +83,9 @@ int main( )
                           MUL::transpose_threads4x,
 
                           MUL::trivial_threads8x,
-                          MUL::transpose_threads8x};
+                          MUL::transpose_threads8x,
+                          
+                          MUL::intrinsics};
 
   Matrix<float> mul{};
 

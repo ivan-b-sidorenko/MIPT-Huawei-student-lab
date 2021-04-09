@@ -19,13 +19,13 @@ namespace MXL
   template<>
   bool is_zero(const double & val)
   {
-    return val < 1e-12;
+    return std::abs(val) < 1e-12;
   }
 
   template<>
   bool is_zero(const float & val)
   {
-    return val < 1e-6;
+    return std::abs(val) < 1e-6;
   }
 
   template<typename T>
@@ -213,7 +213,7 @@ namespace MXL
       for (size_t j = 0; j < cols_; ++j)
         if (!is_zero(arr_[i][j] - matr[i][j]))
         {
-          std::cerr << std::endl << "(i, j) = (" << i << ", " << j << ")" << std::endl;
+          std::cerr << "elem(" << i << ", " << j << "): " << arr_[i][j] << " != " << matr[i][j] << std::endl;
           return false;
         }
     
