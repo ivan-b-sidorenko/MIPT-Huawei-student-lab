@@ -30,6 +30,8 @@ namespace linal
 
     Batch &operator =( Batch &&rhs )
     {
+      if (&rhs == this)
+        return *this;
       Batch tmp = std::move(rhs);
 
       std::swap(tmp, *this);

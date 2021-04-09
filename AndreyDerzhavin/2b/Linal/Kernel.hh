@@ -19,7 +19,7 @@ namespace linal
 
     template<typename empl_f>
     Kernel( size_t size, size_t rows, size_t cols, empl_f func ) 
-          : rows_(rows), cols_(cols), layers_{size, {rows, cols, func}}
+          : rows_(rows), cols_(cols), layers_(size, {rows, cols, func})
     {}
 
     Kernel( const Kernel & ) = default;
@@ -32,6 +32,8 @@ namespace linal
 
     Kernel &operator =( Kernel &&ker )
     {
+      if (&ker == this)
+        return *this;
       Kernel tmp = std::move(ker);
 
       std::swap(rows_, tmp.rows_);

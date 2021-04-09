@@ -34,6 +34,8 @@ namespace linal
 
     Tensor &operator =( Tensor &&rhs )
     {
+      if (&rhs == this)
+        return *this;
       Tensor tmp = std::move(rhs);
 
       std::swap(tmp.batches_, batches_);
