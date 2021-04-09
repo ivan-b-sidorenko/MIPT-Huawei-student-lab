@@ -1,0 +1,1 @@
+g++ -Wall -Wextra -mavx2 -mbmi2 -mpopcnt -mfma -mcx16 -mtune=znver1 -pthread -g -O0 -I mul_funcs -I ../matrix main.cc

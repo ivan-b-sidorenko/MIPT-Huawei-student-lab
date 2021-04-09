@@ -31,10 +31,10 @@ auto speed_test( Matrix<float> & m1,
 
   auto time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-//#if 0
+#if 0
   if (mul != res)
     cout << "INCORRECT" << endl;
-//#endif
+#endif
 
   cout << "    " << time << " msc" << endl;
 
@@ -101,9 +101,9 @@ int main( )
 
   Matrix<float> mul{};
 
-//#if 0
+#if 0
   mul = m1 * m2;
-//#endif
+#endif
 
   for (auto && func : functions)
     speed_test(m1, m2, mul, func);

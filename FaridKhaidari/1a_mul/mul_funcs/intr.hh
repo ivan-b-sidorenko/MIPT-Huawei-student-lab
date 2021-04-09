@@ -43,8 +43,6 @@ namespace MUL
         }
       }
     }
-    
-    std::cout << res << std::endl;
 
     return res;
   }
