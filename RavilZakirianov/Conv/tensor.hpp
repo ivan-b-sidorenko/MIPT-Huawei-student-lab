@@ -4,7 +4,9 @@
 #include <vector>
 #include <cstdlib> // для функций rand() и srand()
 #include <ctime> // для функции time()
-
+#include <cstdlib> // для функций rand() и srand()
+#include <chrono>
+#include <thread>
 #define p(s) std::cout << s << std::endl;
 
 namespace linear {
@@ -19,10 +21,13 @@ namespace linear {
             Matrix(int row, int col, float flag);
             Matrix(int row, int col, float** arr);
             Matrix(const linear::Matrix& A);
+            bool add_matrix(const linear::Matrix& A);
             int get_row() const;
             int get_col() const;
+            bool compare(linear::Matrix& M) const;
             void print() const;
-            Matrix& matrix_conv(Matrix& input, Matrix& Ker, Matrix& result);
+            Matrix& matrix_conv(std::vector<linear::Matrix>& input, std::vector<linear::Matrix>& Ker, Matrix& result);
+            Matrix& matrix_opt_conv(std::vector<linear::Matrix>& input, std::vector<linear::Matrix>& Ker, Matrix& result);
             ~Matrix();
     };
 }
@@ -41,6 +46,8 @@ namespace ML {
             Batch(linear::Matrix& matrix, int c);
             Batch(std::vector<linear::Matrix> matrix, int w, int h, int c);
             void print() const;
+            bool compare(ML::Batch& batch) const;
+            void union_matrix(std::vector<linear::Matrix> M1, std::vector<linear::Matrix> M2, std::vector<linear::Matrix> M3, std::vector<linear::Matrix> M4);
             int get_width() const;
             int get_height() const;
             int get_channel() const;
@@ -58,7 +65,9 @@ namespace ML {
             Tensor(int w, int h, int c, int num_b, std::vector<ML::Batch> B);
             Tensor(const ML::Batch& b, int num_b);
             ML::Tensor& conv(Tensor& Kernel, Tensor& result);
+            ML::Tensor& opt_conv(Tensor& Kernel, Tensor& result);
             void print() const;
+            bool compare(ML::Tensor& tensor) const;
             int get_width() const;
             int get_height() const;
             int get_channel() const;
