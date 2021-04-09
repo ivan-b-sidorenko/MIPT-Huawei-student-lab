@@ -12,6 +12,7 @@
 using std::string;
 using std::vector;
 using mul_fnc = Mul::Mat (*)(const Mul::Mat &lhs, const Mul::Mat &rhs);
+using cl_mul_fnc = Mul::Mat (*)(const Mul::Driver &, const Mul::Mat &, const Mul::Mat &, cl_ulong &);
 
 struct func_n_name final
 {
@@ -19,11 +20,13 @@ struct func_n_name final
   string name;
 };
 
-struct name_n_name final
+
+struct clfunc_n_name final
 {
-  std::string func_name;
-  std::string name_to_print;
+  cl_mul_fnc func;
+  string name;
 };
+
 
 linal::ldbl naive_ms, min_ms = std::numeric_limits<linal::ldbl>::max(), min_cl_ms = std::numeric_limits<linal::ldbl>::max();
 
@@ -44,9 +47,9 @@ Mul::Mat Measure( const Mul::Mat &lhs, const Mul::Mat &rhs, const func_n_name &f
   return answ;
 }
 
-Mul::Mat Run( const Mul::Mat &lhs, const Mul::Mat &rhs, const name_n_name &names )
+Mul::Mat Run( const Mul::Mat &lhs, const Mul::Mat &rhs, const clfunc_n_name &fname )
 {
-  std::cout << names.name_to_print << ":" << std::endl;
+  std::cout << fname.name << ":" << std::endl;
 
   try 
   {
@@ -56,7 +59,7 @@ Mul::Mat Run( const Mul::Mat &lhs, const Mul::Mat &rhs, const name_n_name &names
     cl_ulong elapsed_ns;
     timer::Timer timer;
 
-    auto answ = driver.MatMul(lhs, rhs, names.func_name, elapsed_ns);
+    auto answ = fname.func(driver, lhs, rhs, elapsed_ns);
 
     auto res = static_cast<linal::ldbl>(timer.elapsed_mcs()) / 1'000;
 
@@ -73,7 +76,7 @@ Mul::Mat Run( const Mul::Mat &lhs, const Mul::Mat &rhs, const name_n_name &names
   }
   catch ( std::runtime_error &err )
   {
-    std::cerr << "Error occured in " << names.func_name << std::endl;
+    std::cerr << "Error occured in " << fname.name << std::endl;
     std::cerr << err.what() << std::endl;
   }
 
@@ -164,9 +167,9 @@ int main( void )
 
 
   //***********                  HERE GOES OPENCL     ****************************
-  std::vector<name_n_name> cl_funcs = 
+  std::vector<clfunc_n_name> cl_funcs = 
   {
-    {"Naive", "OpenCL naive"}
+    {Mul::oclNaive, "OpenCL naive"}
   };
 
   for (auto &&f : funcs)

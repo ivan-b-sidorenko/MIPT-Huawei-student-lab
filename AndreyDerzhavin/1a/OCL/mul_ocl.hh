@@ -23,16 +23,19 @@ namespace Mul
 
     void build( void );
 
-    linal::Matrix<float> MatMul( const linal::Matrix<float> &A, const linal::Matrix<float> &B, const std::string &kern_name, cl_ulong &elapsed );
+    linal::Matrix<float> MatMul( const linal::Matrix<float> &A, const linal::Matrix<float> &B, const std::string &kern_name, 
+                                 cl_ulong &elapsed, const cl::NDRange &loc_ranges = cl::NullRange ) const;
 
     ~Driver( void ) = default;
   private:
     bool select_device( void );
 
-    cl_ulong kernel_exec( cl::Kernel &kern, const cl::NDRange &glob_ranges );
+    cl_ulong kernel_exec( cl::Kernel &kern, const cl::NDRange &glob_ranges, const cl::NDRange &loc_ranges = cl::NullRange ) const;
 
     static const char *err_what(cl_int err_code);
   };
+
+  Mat oclNaive( const Driver &driver, const Mat &lhs, const Mat &rhs, cl_ulong &elapsed_ns );
 
 } // namespace Mul
 

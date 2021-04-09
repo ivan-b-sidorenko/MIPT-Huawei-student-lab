@@ -12,4 +12,9 @@ kernel void Naive( const global float *A, const global float *B, global float *C
 
   C[globalRow * C_cl + globalCol] = res;
 }
+
+kernel void Transp( const global float *A, const global float *B_tr, global float *C, 
+                    const uint C_rw, const uint B_cl, const uint B_rw )
+{
+}
 )"
