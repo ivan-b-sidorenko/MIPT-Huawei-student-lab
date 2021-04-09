@@ -24,7 +24,7 @@ target_compile_features(${EX_NAME} PRIVATE cxx_std_20)
 target_compile_options(${EX_NAME} PRIVATE ${WARN_OPTIONS})
 target_compile_options(${EX_NAME} PRIVATE -g -O0)
 
-target_include_directories(${EX_NAME} PRIVATE Just Matrix OCL Threads)
+target_include_directories(${EX_NAME} PRIVATE Just Matrix OCL Threads Timer)
 
 # Required libraries
 target_link_libraries(${EX_NAME} pthread OpenCL)
