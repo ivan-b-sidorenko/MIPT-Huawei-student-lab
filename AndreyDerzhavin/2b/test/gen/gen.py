@@ -11,6 +11,7 @@ def main():
     parser.add_argument('rows', metavar='H', type=int, help='rows amount')
     parser.add_argument('cols', metavar='W', type=int, help='cols amount')
     parser.add_argument('kern_channels', metavar='KCH', type=int, help='kernel channles amount')
+    parser.add_argument('kern_am', metavar='KAM', type=int, help='kernels amount')
     parser.add_argument('to', metavar='TO', type=int, help='end value for generate numbers')
     parser.add_argument('fr', metavar='FROM', type=int, help='start value for generate numbers')
 
@@ -22,9 +23,9 @@ def main():
     if args.to < args.fr:
       args.to, args.fr = args.fr, args.to
 
-    kern_size = (args.kern_channels, 4, 4)
+    kern_size = (args.kern_am, args.kern_channels, 4, 4)
     tensor = np.random.randint(args.fr, args.to, size=(args.batches, args.channels, args.rows, args.cols))
-    kern = np.random.randint(args.fr, args.to, size=kern_size)
+    kerns = np.random.randint(args.fr, args.to, size=kern_size)
     
     print(args.batches, args.channels, args.rows, args.cols)
   
@@ -37,27 +38,33 @@ def main():
         print()
       print()
 
-    for s in kern_size:
-      print(s, end=' ')
-    print()
+    print(kern_size[0])
 
-    for i in kern:
+    for i in kerns:
+      print(kern_size[1], kern_size[2], kern_size[3])
       for j in i:
         for k in j:
-          print(k, end=' ')
+          for w in k:
+            print(w, end=' ')
+          print()
         print()
       print()
     
     conv = []
+    c_shp = signal.correlate(tensor[0], kerns[0], mode='valid').shape
+
     for img in tensor:
-      conv.append(signal.correlate(img, kern, mode='valid'))
+      el = np.zeros(c_shp, dtype=int)
+
+      for kern in kerns:
+        el += signal.correlate(img, kern, mode='valid')
+      conv.append(el)
 
     print(len(conv), end=' ')
 
     for sh in conv[0].shape:
       print(sh, end=' ')
     print()
-
 
     for i in conv:
       for j in i:
