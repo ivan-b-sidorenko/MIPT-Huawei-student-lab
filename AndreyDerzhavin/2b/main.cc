@@ -1,4 +1,4 @@
-#include "Tensor.hh"
+#include "conv.hh"
 
 int main( void )
 {

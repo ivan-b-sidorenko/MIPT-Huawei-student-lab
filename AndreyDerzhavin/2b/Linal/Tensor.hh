@@ -12,8 +12,8 @@ namespace linal
     std::size_t ch_size_, height_, width_;
     std::vector<Batch> batches_;
   public:
-    Tensor( std::size_t bh_size, std::size_t ch_size, std::size_t height, 
-            std::size_t width, int val = {} ) 
+    Tensor( std::size_t bh_size = 0, std::size_t ch_size = 0, std::size_t height = 0, 
+            std::size_t width = 0, int val = {} ) 
           : Tensor(bh_size, ch_size, height, width, [val]( std::size_t, std::size_t ){return val;})
     {}
 
@@ -64,9 +64,61 @@ namespace linal
     std::size_t get_height  ( void ) const { return height_;          }
     std::size_t get_width   ( void ) const { return width_;           }
 
+    std::istream &Input( std::istream &ist )
+    {
+      size_t bhs;
+      ist >> bhs >> ch_size_ >> height_ >> width_;
+
+      Tensor tmp = {bhs, ch_size_, height_, width_, 
+      [&ist](size_t, size_t)
+      {
+        int val;
+        ist >> val;
+
+        return val;
+      }
+      };
+
+      std::swap(tmp, *this);
+
+      return ist;
+    }
+
+    template <typename walker>
+    void Walker( walker walk )
+    {
+      for (size_t i = 0, endi = batches_.size(); i < endi; ++i)
+        for (size_t j = 0; j < ch_size_; ++j)
+        {
+          auto two_walk = [walk, i, j](size_t k, size_t w) { return walk(i, j, k, w); };
+          batches_[i][j].Walker(two_walk);
+        }
+    }
+
+    std::ostream &Dump( std::ostream &ost ) const
+    {
+      for (size_t i = 0, endi = batches_.size(); i < endi; ++i)
+      {
+        for (size_t j = 0; j < ch_size_; ++j)
+          ost << batches_[i][j] << std::endl;
+        ost << std::endl;
+      }
+
+      return ost;
+    }
+
     ~Tensor( void ) = default;
   };
+}
 
+std::istream &operator >>( std::istream &ist, linal::Tensor &tensor )
+{
+  return tensor.Input(ist);
+}
+
+std::ostream &operator <<( std::ostream &ost, const linal::Tensor &tensor )
+{
+  return tensor.Dump(ost);
 }
 
 #endif // __TENSOR_H__

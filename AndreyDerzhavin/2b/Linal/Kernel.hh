@@ -13,7 +13,7 @@ namespace linal
     std::vector<Mat> layers_;
   public:
 
-    Kernel( size_t size, size_t rows, size_t cols, int val = {} ) : Kernel(size, rows, cols, [val](size_t, size_t){ return val; })
+    Kernel( size_t size = 0, size_t rows = 0, size_t cols = 0, int val = {} ) : Kernel(size, rows, cols, [val](size_t, size_t){ return val; })
     {
     }
 
@@ -44,8 +44,57 @@ namespace linal
     std::size_t get_rows      ( void ) const { return rows_;           }
     std::size_t get_cols      ( void ) const { return cols_;           }
 
+    std::istream &Input( std::istream &ist )
+    {
+      size_t chs;
+      ist >> chs >> rows_ >> cols_;
+
+      Kernel tmp = {chs, rows_, cols_, 
+      [&ist](size_t, size_t)
+      {
+        int val;
+        ist >> val;
+
+        return val;
+      }
+      };
+
+      std::swap(tmp, *this);
+
+      return ist;
+    }
+
+    template <typename walker>
+    void Walker( walker walk )
+    {
+      for (size_t i = 0, endi = layers_.size(); i < endi; ++i)
+      {
+        auto two_walk = [walk, i](size_t j, size_t k) { return walk(i, j, k); };
+        layers_[i].Walker(two_walk);
+      }
+    }
+
+    std::ostream &Dump( std::ostream &ost ) const
+    {
+      for (size_t i = 0, endi = layers_.size(); i < endi; ++i)
+        ost << layers_[i] << std::endl;
+
+      return ost;
+    }
+
     ~Kernel( void ) = default;
   };
+
+}
+
+std::istream &operator >>( std::istream &ist, linal::Kernel &kern )
+{
+  return kern.Input(ist);
+}
+
+std::ostream &operator >>( std::ostream &ost, const linal::Kernel &kern )
+{
+  return kern.Dump(ost);
 }
 
 #endif // __KERNEL_H__
