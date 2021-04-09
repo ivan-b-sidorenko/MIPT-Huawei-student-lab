@@ -10,6 +10,7 @@ def main():
     parser.add_argument('channels', metavar='C', type=int, help='channels amount')
     parser.add_argument('rows', metavar='H', type=int, help='rows amount')
     parser.add_argument('cols', metavar='W', type=int, help='cols amount')
+    parser.add_argument('kern_channels', metavar='KCH', type=int, help='kernel channles amount')
     parser.add_argument('to', metavar='TO', type=int, help='end value for generate numbers')
     parser.add_argument('fr', metavar='FROM', type=int, help='start value for generate numbers')
 
@@ -21,7 +22,7 @@ def main():
     if args.to < args.fr:
       args.to, args.fr = args.fr, args.to
 
-    kern_size = (4, 4, 4)
+    kern_size = (args.kern_channels, 4, 4)
     tensor = np.random.randint(args.fr, args.to, size=(args.batches, args.channels, args.rows, args.cols))
     kern = np.random.randint(args.fr, args.to, size=kern_size)
     
