@@ -34,7 +34,9 @@ namespace linal
         return *this;
       Batch tmp = std::move(rhs);
 
-      std::swap(tmp, *this);
+      std::swap(height_, rhs.height_);
+      std::swap(width_, rhs.width_);
+      std::swap(channels_, rhs.channels_);
 
       return *this;
     }
