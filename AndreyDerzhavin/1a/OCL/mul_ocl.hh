@@ -1,7 +1,7 @@
 #ifndef __MUL_OCL_H__
 #define __MUL_OCL_H__
 
-#include <CL/cl.hpp>
+#include <CL/cl2.hpp>
 #include "matrix.hh"
 
 namespace Mul

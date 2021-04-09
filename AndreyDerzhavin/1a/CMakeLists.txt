@@ -30,6 +30,6 @@ target_include_directories(${EX_NAME} PRIVATE Just Matrix OCL Threads Timer)
 target_link_libraries(${EX_NAME} pthread OpenCL)
 
 target_compile_definitions(${EX_NAME} PRIVATE
-  __CL_ENABLE_EXCEPTIONS
-  CL_TARGET_OPENCL_VERSION=220
+  CL_HPP_ENABLE_EXCEPTIONS
+  CL_HPP_TARGET_OPENCL_VERSION=210
 )
