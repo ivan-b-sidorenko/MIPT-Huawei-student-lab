@@ -6,6 +6,7 @@
 #include "just.hh"
 #include "thrd.hh"
 #include "intr.hh"
+#include "opcl.hh"
 
 using std::cin;
 using std::cout;
@@ -13,20 +14,32 @@ using std::endl;
 using std::vector;
 
 using namespace MXL;
+using MXf = Matrix<float>;
 
-using Func = Matrix<float> (*) (const Matrix<float> &, const Matrix<float> &);
+using Func = MXf (*) (const MXf &, const MXf &);
 
-auto speed_test( Matrix<float> & m1,
-                 Matrix<float> & m2,
-                 Matrix<float> & mul,
+auto speed_test( MXf & m1,
+                 MXf & m2,
+                 MXf & mul,
                  Func func )
 {
   static uint counter = 0;
 
   cout << std::setw(2) << counter++ << ": ";
+
+  MXf res{};
+
   auto start = std::chrono::steady_clock::now();
 
-  Matrix<float> res = (*func)(m1, m2);
+  try
+  {
+    res = (*func)(m1, m2);
+  }
+  catch ( std::runtime_error &err )
+  {
+    std::cerr << err.what() << std::endl;
+  }
+
   auto end = std::chrono::steady_clock::now();
 
   auto time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
@@ -50,8 +63,8 @@ int main( )
 
   assert(cols1 == rows2);
 
-  Matrix<float> m1{rows1, cols1};
-  Matrix<float> m2{rows2, cols2};
+  MXf m1{rows1, cols1};
+  MXf m2{rows2, cols2};
 
   for (size_t i = 0; i < rows1; ++i)
     for (size_t j = 0; j < cols1; ++j)
@@ -85,13 +98,17 @@ int main( )
                           MUL::trivial_threads8x,
                           MUL::transpose_threads8x,
                           
-                          MUL::intrinsics};
+                          MUL::intrinsics,
 
-  Matrix<float> mul{};
+                          MUL::ocl};
+
+  MXf mul{};
 
 #if 0
   mul = m1 * m2;
 #endif
+
+  MUL::MX_DRIVER.build();
 
   for (auto && func : functions)
     speed_test(m1, m2, mul, func);

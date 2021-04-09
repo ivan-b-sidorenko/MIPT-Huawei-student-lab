@@ -14,19 +14,7 @@ namespace MXL
 {
   template<typename T>
   bool is_zero(const T & val)
-  {return (val == 0);}
-
-  template<>
-  bool is_zero(const double & val)
-  {
-    return std::abs(val) < 1e-12;
-  }
-
-  template<>
-  bool is_zero(const float & val)
-  {
-    return std::abs(val) < 1e-6;
-  }
+  { return (val == 0); }
 
   template<typename T>
   class Matrix
@@ -114,8 +102,8 @@ namespace MXL
   template <typename It> 
   Matrix<T>::Matrix(size_t rows, size_t cols, It beg, It end) : Matrix(rows, cols)
   {
-    for (size_t i = 0; i < rows_, beg != end; ++i)
-      for (size_t j = 0; j < cols_, beg != end; ++j, ++beg)
+    for (size_t i = 0; i < rows_ && beg != end; ++i)
+      for (size_t j = 0; j < cols_ && beg != end; ++j, ++beg)
         arr_[i][j] = *beg;
   }
 
@@ -233,7 +221,7 @@ namespace MXL
   }
 
 
-    template <typename T>
+  template <typename T>
   Matrix<T> transpose(const Matrix<T> matr)
   {
     Matrix<T> tmp{matr};
@@ -282,6 +270,14 @@ namespace MXL
     }
 
     return ost;
+  }
+
+  template <typename T, typename It>
+  void vectorize( It beg, It end, Matrix<T> matr )
+  {
+    for (size_t i = 0, rows = matr.rows(); i < rows && beg != end; ++i)
+      for (size_t j = 0, cols = matr.cols(); j < cols && beg != end; ++j, ++beg)
+        *beg = matr[i][j];
   }
 }
 
