@@ -25,7 +25,7 @@ namespace MXL
   template<>
   bool is_zero(const float & val)
   {
-    return val < 1e-12;
+    return val < 1e-6;
   }
 
   template<typename T>

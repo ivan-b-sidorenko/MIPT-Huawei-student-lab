@@ -28,10 +28,12 @@ namespace MUL
       {
         size_t k = 0;
 
+        __m256 a = _mm256_set1_ps(lhs[i][j]);
+
         for (size_t end = lhs_c - 8; k < end; k += 8)
           _mm256_storeu_ps(
             res[i] + k, _mm256_fmadd_ps(
-                          _mm256_loadu_ps(lhs[i] + k),
+                          a,
                           _mm256_loadu_ps(rhs_T[j] + k),
                           _mm256_loadu_ps(res[i] + k)
                         )

@@ -264,12 +264,12 @@ namespace MUL
         for (size_t j = 0; j < rhs_c; ++j)
         {
           size_t k = 0;
-          for (; k < lhs_c; k += 2)
+          for (size_t end = lhs_c - 2; k < end; k += 2)
             tmp[m][j] += lhs[m][k] * rhs_t[j][k]
                        + lhs[m][k+1] * rhs_t[j][k+1];
           while (k < lhs_c)
           {
-            tmp[m][j] += lhs[m][k] * rhs[j][k];
+            tmp[m][j] += lhs[m][k] * rhs_t[j][k];
             ++k;
           }
         }
@@ -311,14 +311,14 @@ namespace MUL
         for (size_t j = 0; j < rhs_c; ++j)
         {
           size_t k = 0;
-          for (; k < lhs_c; k += 4)
+          for (size_t end = lhs_c - 4; k < end; k += 4)
             tmp[m][j] += lhs[m][k] * rhs_t[j][k]
                        + lhs[m][k+1] * rhs_t[j][k+1]
                        + lhs[m][k+2] * rhs_t[j][k+2]
                        + lhs[m][k+3] * rhs_t[j][k+3];
           while (k < lhs_c)
           {
-            tmp[m][j] += lhs[m][k] * rhs[j][k];
+            tmp[m][j] += lhs[m][k] * rhs_t[j][k];
             ++k;
           }
         }
@@ -359,7 +359,7 @@ namespace MUL
         for (size_t j = 0; j < rhs_c; ++j)
         {
           size_t k = 0;
-          for (; k < lhs_c; k += 8)
+          for (size_t end = lhs_c - 8; k < end; k += 8)
             tmp[m][j] += lhs[m][k] * rhs_t[j][k]
                        + lhs[m][k+1] * rhs_t[j][k+1]
                        + lhs[m][k+2] * rhs_t[j][k+2]
@@ -370,7 +370,7 @@ namespace MUL
                        + lhs[m][k+7] * rhs_t[j][k+7];
           while (k < lhs_c)
           {
-            tmp[m][j] += lhs[m][k] * rhs[j][k];
+            tmp[m][j] += lhs[m][k] * rhs_t[j][k];
             ++k;
           }
         }
