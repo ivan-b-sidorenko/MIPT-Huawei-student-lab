@@ -1,6 +1,12 @@
 #include "conv.hh"
+#include "Timer.hh"
 
 void input_args( std::istream &ist, linal::Tensor &ten, std::vector<linal::Kernel> &kerns, linal::Tensor &answ );
+
+struct func_n_name final
+{
+
+};
 
 int main( void )
 {

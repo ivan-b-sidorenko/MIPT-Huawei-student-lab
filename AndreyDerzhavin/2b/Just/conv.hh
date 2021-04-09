@@ -10,9 +10,9 @@ namespace Conv
 
   Tensor Conv( const Tensor &ten, const std::vector<Kernel> &kerns )
   {
-    size_t conv_szs[3] = {ten.get_ch_size() - kerns[0].get_ch_amount() - 1, 
-                          ten.get_width() - kerns[0].get_rows() - 1,
-                          ten.get_height() - kerns[0].get_cols() - 1};
+    size_t conv_szs[3] = {ten.get_ch_size() - kerns[0].get_ch_amount() + 1, 
+                          ten.get_width() - kerns[0].get_rows() + 1,
+                          ten.get_height() - kerns[0].get_cols() + 1};
 
     linal::Tensor answ = {ten.get_bat_size(), conv_szs[0], conv_szs[1], conv_szs[2]};
 

@@ -26,7 +26,7 @@ target_compile_options(${EX_NAME} PRIVATE -g -O0)
 # Required libraries
 target_link_libraries(${EX_NAME} pthread OpenCL)
 
-target_include_directories(${EX_NAME} PRIVATE Linal Just)
+target_include_directories(${EX_NAME} PRIVATE Linal Just Timer)
 
 target_compile_definitions(${EX_NAME} PRIVATE 
   CL_HPP_ENABLE_EXCEPTIONS
