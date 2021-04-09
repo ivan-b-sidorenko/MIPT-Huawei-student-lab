@@ -52,7 +52,6 @@ namespace Mul
     
     cl::Buffer clC_buf{context_, CL_MEM_READ_WRITE, C_buf.size() * sizeof(C_buf[0])};
 
-
     cl::NDRange global_ranges{A.getRows(), B.getCols()};
 
     try
@@ -66,7 +65,7 @@ namespace Mul
 
       kernel.setArg(3, static_cast<unsigned>(A.getRows()));
       kernel.setArg(4, static_cast<unsigned>(A.getCols()));
-
+      kernel.setArg(5, static_cast<unsigned>(B.getCols()));
       
       nsec_elapsed = kernel_exec(kernel, global_ranges);
     }
@@ -78,7 +77,7 @@ namespace Mul
     }
 
     queue_.enqueueReadBuffer(clC_buf, CL_TRUE, 0, sizeof(C_buf[0]) * C_buf.size(), C_buf.data());
-
+    
     return {A.getRows(), B.getCols(), C_buf.begin(), C_buf.end()};
   }
 
