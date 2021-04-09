@@ -8,7 +8,7 @@ namespace Conv
   using linal::Tensor;
   using linal::Kernel;
 
-  Tensor Conv( const Tensor &ten, const std::vector<Kernel> &kerns )
+  Tensor Naive( const Tensor &ten, const std::vector<Kernel> &kerns )
   {
     size_t conv_szs[3] = {ten.get_ch_size() - kerns[0].get_ch_amount() + 1, 
                           ten.get_width() - kerns[0].get_rows() + 1,
