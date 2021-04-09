@@ -18,29 +18,29 @@ namespace MUL
     size_t lhs_r = lhs.rows(),
            lhs_c = lhs.cols(),
            rhs_c = rhs.cols();
-  
-    MXf rhs_T{transpose(rhs)};
+
     MXf res{lhs_r, rhs_c};
+
 
     for (size_t i = 0; i < lhs_r; ++i)
     {
-      for (size_t j = 0; j < rhs_c; ++j)
+      for (size_t j = 0; j < lhs_c; ++j)
       {
         size_t k = 0;
 
         __m256 a = _mm256_set1_ps(lhs[i][j]);
 
-        for (size_t end = lhs_c - 8; k < end; k += 8)
+        for (size_t end = rhs_c - 8; k < end; k += 8)
           _mm256_storeu_ps(
             res[i] + k, _mm256_fmadd_ps(
                           a,
-                          _mm256_loadu_ps(rhs_T[j] + k),
+                          _mm256_loadu_ps(rhs[j] + k),
                           _mm256_loadu_ps(res[i] + k)
                         )
           );
-        while (k < lhs_c)
+        while (k < rhs_c)
         {
-          res[i][j] += lhs[i][k] * rhs_T[j][k];
+          res[i][k] += lhs[i][j] * rhs[j][k];
           ++k;
         }
       }
@@ -80,7 +80,7 @@ __m256 _mm256_fmadd_ps (__m256 a, __m256 b, __m256 c);
 Multiply packed single-precision (32-bit) floating-point elements in a and b, add the intermediate 
 result to packed elements in c, and store the results in dst.
 
-Перемножает элементы из a и b, складывает результат перемножения с элементами с и возвращает сумму
+Перемножает элементы из a и b, складывает результат перемножения с элементами C и возвращает сумму
 __________________________________________________________________________________________________
 
 __m256 _mm256_loadu_ps (float const * mem_addr);
