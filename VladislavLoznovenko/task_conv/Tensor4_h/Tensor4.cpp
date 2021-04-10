@@ -45,6 +45,17 @@ Tensor4::Tensor4(const Tensor4& rhs)
 		butches.push_back(rhs.butches[i]);
 }
 
+Tensor4::Tensor4(int start_h , int num_h , Tensor4& rhs)
+{
+	high = num_h;
+	width = rhs.get_width();
+	num_mrx = rhs.get_num_mrx();
+	num_butch = rhs.get_num_butch();
+
+	for (int i = 0 ; i < num_butch ; ++i)
+		butches.push_back(Chanel(start_h , num_h , rhs[i]));
+}
+
 void Tensor4::set_zero()
 {
 	for (int i = 0 ; i < num_butch ; ++i)
@@ -103,6 +114,33 @@ std::ostream& operator<<(std::ostream& out , Tensor4& rhs)
 	}
 
 	return out;
+}
+
+Tensor4 merge_ten(std::vector<Tensor4> rhs)
+{
+	Tensor4 result(rhs[0].get_num_butch() , rhs[0].get_num_mrx() , rhs[0].get_high() * rhs.size() , rhs[0].get_width());
+	int counter = 0;
+	for (auto it = rhs.begin() ; it != rhs.end() ; ++it)
+	{
+		for (int butch = 0 ; butch < result.get_num_butch() ; ++butch)
+			for (int chan = 0 ; chan < result.get_num_mrx() ; ++chan)
+
+				for (int i = 0 ; i < it->get_high() ; ++i)
+					for (int j = 0 ; j < it->get_width() ; ++j)
+						result[butch][chan][counter * (it->get_high()) + i][j] = (*it)[butch][chan][i][j];
+		counter++;
+	}
+	return result;
+}
+
+void add_ten(Tensor4& for_add , Tensor4& result , int counter)
+{
+	for (int butch = 0 ; butch < result.get_num_butch() ; ++butch)
+		for (int chan = 0 ; chan < result.get_num_mrx() ; ++chan)
+
+			for (int i = 0 ; i < for_add.get_high() ; ++i)
+				for (int j = 0 ; j < for_add.get_width() ; ++j)
+					result[butch][chan][counter + i][j] = for_add[butch][chan][i][j];
 }
 
 };

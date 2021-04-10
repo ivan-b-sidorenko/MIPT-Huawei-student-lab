@@ -13,6 +13,7 @@ private:
 public:
 	Chanel(int num , int num_h , int num_w);
 	Chanel(int num , int num_h , int num_w , int mod);
+	Chanel(int start_h , int num_h , Chanel& rhs);
 	Chanel(const Chanel& rhs);
 	~Chanel() {};
 

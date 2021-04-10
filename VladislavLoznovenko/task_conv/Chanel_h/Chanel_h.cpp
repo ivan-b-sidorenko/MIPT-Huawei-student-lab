@@ -10,7 +10,7 @@ Chanel::Chanel(int num , int num_h , int num_w)
 
 	for (int i = 0 ; i < num ; ++i)
 	{
-		chanels.push_back(matrix::Matrix(num_h , num_w));
+		chanels.push_back(matrix::Matrix(high , width));
 	}
 }
 
@@ -37,6 +37,16 @@ Chanel::Chanel(const Chanel& rhs)
 
 	for (int i = 0 ; i < num_mrx ; ++i)
 		chanels.push_back(rhs.chanels[i]);
+}
+
+Chanel::Chanel(int start_h , int num_h , Chanel& rhs)
+{
+	high = num_h;
+	width = rhs.get_width();
+	num_mrx = rhs.get_num_mrx();
+
+	for (int i = 0 ; i < num_mrx ; ++i)
+		chanels.push_back(matrix::Matrix(rhs[i] , high , width , start_h , 0));
 }
 
 void Chanel::set_zero()

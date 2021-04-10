@@ -1,4 +1,5 @@
 #pragma once
+#include <thread>
 #include <iostream>
 #include <vector>
 #include <assert.h>
@@ -34,6 +35,8 @@ public:
 };
 
 void sum(Matrix& A , Matrix& B , Matrix& res);
+Matrix merge_mrx(std::vector<Matrix> rhs);
+int elem_sum(matrix::Matrix& lhs , matrix::Matrix& rhs);
 void Matrix_product(const Matrix& lhs , const Matrix& rhs , Matrix& result);
 void Matrix_product_fast(const Matrix& lhs , const Matrix& rhs , Matrix& result);
 
