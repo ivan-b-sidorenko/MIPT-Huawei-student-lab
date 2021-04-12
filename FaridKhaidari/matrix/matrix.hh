@@ -1,3 +1,6 @@
+#ifndef MX_L_HH
+#define MX_L_HH
+
 #include <cmath>
 #include <cassert>
 #include <iomanip>
@@ -554,3 +557,6 @@ namespace MX
         return ost;
     }
 }
+
+#endif // MX_HH
+
