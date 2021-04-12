@@ -167,15 +167,13 @@ namespace Mul_optim
             }
         }
     }
-
-
-
+    
     std::vector<func_info> functions = 
     {
         {mul_unroll_2x, "unrolling_2x"},
         {mul_unroll_4x, "unrolling_4x"},
         {mul_unroll_8x, "unrolling_8x"},
-        {mul_with_intrinsics, "mul_with_intrinsics"},
+        {mul_with_intrinsics, "mul_with_intrinsics"}
     };
 
 }

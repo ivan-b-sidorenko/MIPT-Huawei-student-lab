@@ -6,33 +6,49 @@ namespace Linear_space
                                                               widht_(widht),
                                                               n_chnls_(n_chnls)
     {
-        channels.reserve(n_chnls_);
+        //channels.reserve(n_chnls_);
 
         for (size_t k = 0; k < n_chnls_; ++k)
-            channels[k] = (Matr_flt{height_, widht_, 0});
+            channels.emplace_back(height_, widht_, 0);
+
     }
 
-    Channel::Channel(const std::vector<Matr_flt>& matr_vec, uint height, uint widht) : height_(height),
-                                                                                widht_(widht),
-                                                                                n_chnls_(matr_vec.size())
+    Channel::Channel(const std::vector<Matrix>& matr_vec, uint height, uint widht) : height_(height),
+                                                                                       widht_(widht),
+                                                                                       n_chnls_(matr_vec.size())
     {
-        channels.reserve(n_chnls_);
-
+        //channels.reserve(n_chnls_);
         for (size_t k = 0; k < n_chnls_; ++k)
-            channels[k] = matr_vec[k];
-    } 
-/*
+            channels.emplace_back(matr_vec[k]);
+    }
+
+    Channel::Channel(uint height, uint widht, uint n_chnls, float data) : height_(height),
+                                                                          widht_(widht),
+                                                                          n_chnls_(n_chnls)
+    {
+        //channels.reserve(n_chnls_);
+        for (size_t k = 0; k < n_chnls_; ++k)
+            channels.emplace_back(height_, widht_, data);
+    }
+
+    Channel::Channel(uint height, uint widht, uint n_chnls, enum Mode mode) : height_(height),
+                                                                                    widht_(widht),
+                                                                                    n_chnls_(n_chnls)
+    {
+        //channels.reserve(n_chnls_);
+        for (size_t k = 0; k < n_chnls_; ++k)
+            channels.emplace_back(height_, widht_, mode);
+    }
+
     Channel::Channel(const Channel& chnl)
     {
         height_ = chnl.get_height();
         widht_ = chnl.get_widht();
         n_chnls_ = chnl.get_n_chnls();
 
-
-        
         for (auto&& chnl_: chnl.channels)
             channels.push_back(chnl_);
-    }*/
+    }
 
     Channel& Channel::operator= (const Channel& rhs)
     {
@@ -87,13 +103,13 @@ namespace Linear_space
         return n_chnls_;
     }
 
-    const Matr_flt& Channel::get_matr(size_t index)
+    const Matrix& Channel::get_matr(size_t index)
     {
         return channels[index];
     }
 
 
-    const Matr_flt& Channel::operator[] (size_t index)
+    Matrix& Channel::operator[] (size_t index)
     {
         return channels[index];
     }
@@ -106,7 +122,8 @@ namespace Linear_space
 
     for (size_t k = 0; k < n_chnl; ++k)
     {
-        Matr_flt tmp = chnl.get_matr(k);
+        std::cout << "Layer №" << k + 1 << std::endl;
+        Matrix tmp = chnl[k];
 
         os << tmp;
         os << "         " << std::endl;

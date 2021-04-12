@@ -11,11 +11,17 @@
 #include <fstream>
 #include <ctime>
 #include <immintrin.h>
+#include <cstdlib>
 
 
 namespace Linear_space
 {
-    template <typename Data>
+ 
+    enum Mode
+    {
+        RANDOM
+    };
+
     class Matrix final
     {
         private:
@@ -24,10 +30,10 @@ namespace Linear_space
             uint rows = 0, clmns = 0;
 
             //! Perfomance of my matrix
-            Data** matrix = nullptr;
+            float** matrix = nullptr;
 
             //! using for special data type of my matrix
-            using DataIt = typename std::vector<Data>::iterator;
+            using floatIt = typename std::vector<float>::iterator;
 
             //! Constant for copmaring
             const int EPSILON = 1e-6;
@@ -35,19 +41,19 @@ namespace Linear_space
             struct Row_struct
             {
                 uint cols = 0;
-                Data *matr_row = nullptr;
+                float *matr_row = nullptr;
 
-                Row_struct(uint cols, Data *row) : cols(cols),
+                Row_struct(uint cols, float *row) : cols(cols),
                                                   matr_row(row)
                 {}
 
-                const Data& operator [](size_t i) const
+                const float& operator [](size_t i) const
                 {
                     assert(i < cols);
                     return matr_row[i];
                 }
 
-                Data& operator [](size_t i)
+                float& operator [](size_t i)
                 {
                     assert(i < cols);
                     return matr_row[i];
@@ -65,15 +71,15 @@ namespace Linear_space
 
 
             //! Constructor for matrix of zeros
-            Matrix(int rows_, int clmns_) : rows(rows_),
+            Matrix(uint rows_, uint clmns_) : rows(rows_),
                                             clmns(clmns_)
             {
                 assert(rows_*clmns_ != 0);
 
-                matrix = new Data* [rows];
+                matrix = new float* [rows];
                 for (size_t i = 0; i < rows; ++i)
                 {
-                    matrix[i] = new Data [clmns];
+                    matrix[i] = new float [clmns];
 
                     for (size_t j = 0; j < clmns; ++j)
                         matrix[i][j] = 0;
@@ -82,15 +88,15 @@ namespace Linear_space
 
 
             //! Constructor for matrix class of value
-            Matrix(uint rows_, uint clmns_, Data val = Data{}) : rows(rows_),
+            Matrix(uint rows_, uint clmns_, float val) : rows(rows_),
                                                                  clmns(clmns_)
             {
                 assert(rows_ * clmns_ != 0);
-                matrix = new Data* [rows];
+                matrix = new float* [rows];
 
                 for (size_t i = 0; i < rows; ++i)
                 {
-                    matrix[i] = new Data[clmns];
+                    matrix[i] = new float[clmns];
 
                     for (size_t j = 0; j < clmns; ++j)
                         matrix[i][j] = val;
@@ -98,8 +104,27 @@ namespace Linear_space
 
             }
 
+            Matrix(uint rows_, uint clmns_, enum Mode mode) : rows(rows_),
+                                                                    clmns(clmns_)
+            {
+                assert(rows_ * clmns_ != 0);
+                matrix = new float* [rows];
+
+                for (size_t i = 0; i < rows; ++i)
+                {
+                    matrix[i] = new float[clmns];
+
+                    for (size_t j = 0; j < clmns; ++j)
+                    {
+                        if (mode == Mode::RANDOM)
+                            matrix[i][j] = static_cast<float>((rand() % 5)) / 2;
+                    }
+                }
+
+            }
+
             //! Constructor for matrix class from buffer
-            Matrix(uint rows_, uint clmns_, const std::vector<Data>& buffer) : rows(rows_),
+            Matrix(uint rows_, uint clmns_, const std::vector<float>& buffer) : rows(rows_),
                                                                               clmns(clmns_)
             {
                 assert(rows_ * clmns_ != 0);
@@ -107,40 +132,47 @@ namespace Linear_space
 
                 size_t num_of_elems = rows_*clmns_, i = 0;
 
-                matrix = new Data* [rows];
+                matrix = new float* [rows];
 
                 for (i = 0; i < rows; ++i)
-                    matrix[i] = new Data[clmns];
+                    matrix[i] = new float[clmns];
 
                 for (i = 0; i < num_of_elems; ++i)
                     matrix[i / clmns][i % clmns] = buffer[i];
 
             }
 
+            void set_zero()
+            {
+                for (int i = 0 ; i < rows ; i++)
+                    for (int j = 0 ; j < clmns ; j++)
+                        matrix[i][j] = 0;
+            }
+
             //! Constructor class matrix of two iterators to the vector
-            Matrix(uint rows_, uint clmns_, const DataIt& beg, const DataIt& end) : rows(rows_),
+            Matrix(uint rows_, uint clmns_, const floatIt& beg, const floatIt& end) : rows(rows_),
                                                                                     clmns(clmns_)
             {
                 assert(rows_ * clmns_ != 0);
 
-                DataIt current = beg;
+                floatIt current = beg;
                 int num_of_elems = rows*clmns, cnter = 0, i = 0;
 
-                matrix = new Data* [rows];
+                matrix = new float* [rows];
 
                 for (i = 0; i < rows; ++i)
-                    matrix[i] = new Data[clmns];
+                    matrix[i] = new float[clmns];
 
                 i = 0;
 
-                for (DataIt cur = beg; i < num_of_elems; ++cur, ++i)
+                for (floatIt cur = beg; i < num_of_elems; ++cur, ++i)
                     matrix[i / clmns][i % clmns] = *cur;
 
             }
 
 
             //! Function returns a matrix of the upper triangular type
-            static Matrix U_matr(uint num, Data elem)
+            static Matrix U_matr(uint num, float elem)
             {
                 Matrix matr{num, num};
 
@@ -173,20 +205,27 @@ namespace Linear_space
             }
 
             //! Copy constructor for class Matrix
-            Matrix(const Matrix<int>& rhs) : rows(rhs.nrows()),
+            Matrix(const Matrix& rhs) :      rows(rhs.nrows()),
                                              clmns(rhs.nclmns())
             {
                 uint rhs_rows = rhs.nrows(), rhs_cols = rhs.nclmns();
 
-                matrix = new Data* [rhs_rows];
+                matrix = new float* [rhs_rows];
 
                 for (size_t i = 0; i < rhs_rows; ++i)
                 {
-                    matrix[i] = new Data [rhs_cols];
+                    matrix[i] = new float [rhs_cols];
 
                     for (size_t j = 0; j < rhs_cols; ++j)
                         matrix[i][j] = rhs[i][j];
                 }
+            }
+
+            Matrix(Matrix &&mtr) : rows( 0 ), clmns( 0 ), matrix( nullptr )
+            {
+                std::swap( rows, mtr.rows );
+                std::swap( clmns, mtr.clmns );
+                std::swap(this->matrix, mtr.matrix);
             }
 
             //! Destructor for matrix class
@@ -213,10 +252,47 @@ namespace Linear_space
 
             //! Reloading of operators for class matrix
 
-            Matrix<Data>& operator =(const Matrix<Data>& rhs)
+            Matrix& operator =(const Matrix& rhs)
             {
-                if (rows != rhs.rows || clmns != rhs.clmns)
-                    Resize(rhs.rows, rhs.clmns);
+                if (this == &rhs)
+                    return *this;
+
+                if (rows == rhs.rows && clmns == rhs.clmns)
+                    Copy(*this, rhs);
+                else
+                {
+                    Matrix tmp(rhs);
+                    Swap(*this, tmp);
+                }
+
+                return *this;
+            }
+
+
+            void Copy(Matrix& dst, const Matrix& src)
+            {
+                assert(dst.rows == src.rows);
+                assert(dst.clmns == src.clmns);
+
+                for (size_t i = 0; i < dst.rows; ++i)
+                    for (size_t j = 0; j < dst.clmns; ++j)
+
+                        dst.matrix[i][j] = src.matrix[i][j];
+            }
+
+            void Swap(Matrix &lhs, Matrix &rhs)
+            {
+                std::swap(lhs.matrix, rhs.matrix);
+                std::swap(lhs.clmns, rhs.clmns);
+                std::swap(lhs.rows, rhs.rows);
+            }
+
+
+        /*
+            Matrix& operator =(const Matrix& rhs)
+            {
+                //if (rows != rhs.rows || clmns != rhs.clmns)
+                  //  Resize(rhs.rows, rhs.clmns);
 
                 rows = rhs.rows;
                 clmns = rhs.clmns;
@@ -227,11 +303,11 @@ namespace Linear_space
                         matrix[i][j] = rhs.matrix[i][j];
 
                 return (*this);
-            }
+            }*/
 
-            Matrix<Data> operator -() const
+            Matrix operator -() const
             {
-                Matrix<Data> res_mtr{(*this)};
+                Matrix res_mtr{(*this)};
 
                 for (int i = 0; i < rows; ++i)
 
@@ -242,7 +318,7 @@ namespace Linear_space
             }
 
 
-            Matrix<Data>& operator +=(const Matrix<Data>& mtr)
+            Matrix& operator +=(const Matrix& mtr)
             {
                 assert((rows == mtr.rows) && (clmns == mtr.clmns));
 
@@ -257,7 +333,7 @@ namespace Linear_space
                 return (*this);
             }
 
-            Matrix<Data>& operator -=(const Matrix<Data>& mtr)
+            Matrix& operator -=(const Matrix& mtr)
             {
                 assert((rows == mtr.rows) && (clmns == mtr.clmns));
 
@@ -272,7 +348,7 @@ namespace Linear_space
                 return (*this);
             }
 
-            Matrix<Data>& operator *=(const Matrix<Data>& mtr)
+            Matrix& operator *=(const Matrix& mtr)
             {
                 assert(clmns == mtr.rows);
 
@@ -289,7 +365,7 @@ namespace Linear_space
                 return (*this);
             }
 
-            Matrix<Data>& operator *=(Data value)
+            Matrix& operator *=(float value)
             {
                 assert((((*this).rows) * ((*this).clmns)) != 0);
 
@@ -301,7 +377,7 @@ namespace Linear_space
                 return (*this);
             }
 
-            Matrix<Data>& operator /=(Data value)
+            Matrix& operator /=(float value)
             {
                 for (int i = 0; i < rows; ++i)
 
@@ -312,7 +388,7 @@ namespace Linear_space
             }
 
 
-            bool operator ==(const Matrix<Data>& mtr)
+            bool operator ==(const Matrix& mtr)
             {
                 if (rows != mtr.rows && clmns != mtr.clmns)
                     return false;
@@ -327,7 +403,7 @@ namespace Linear_space
             }
 
 
-            Data* operator [](size_t i) const
+            float* operator [](size_t i) const
             {
                 return matrix[i];
             }
@@ -349,6 +425,8 @@ namespace Linear_space
 
     private:
             //! Function for resing matrix
+
+            /*
             void Resize(uint rows_, uint clmns_)
             {
                 assert(rows_ * clmns_ != 0);
@@ -358,20 +436,21 @@ namespace Linear_space
 
                 delete[] matrix;
 
-                matrix = new Data* [rows_];
+                matrix = new float* [rows_];
 
                 for (size_t i = 0; i < rows_; ++i)
-                    matrix[i] = new Data[clmns_];
+                    matrix[i] = new float[clmns_];
             }
+             */
 
     public:
 
             //! Function for mul diagonal elements
-            Data Diag_mul(const Matrix& mtr)
+            float Diag_mul(const Matrix& mtr)
             {
                 assert(mtr.rows == mtr.clmns);
                 assert(mtr.matrix);
-                Data res = 1;
+                float res = 1;
 
                 for (size_t i = 0; i < mtr.rows; ++i)
                     res *= static_cast<double>(mtr.matrix[i][i]);
@@ -430,8 +509,8 @@ namespace Linear_space
             //! Function for trannsposing matrix
             void transposition()
             {
-                Matrix<Data> tmp_mtr{(*this)};
-                Resize(clmns, rows);
+                Matrix tmp_mtr{(*this)};
+                //Resize(clmns, rows);
 
                 for (int i = 0; i < clmns; ++i)
 
@@ -449,14 +528,14 @@ namespace Linear_space
                 int swap_counter = 1;
                 bool is_zero = false;
 
-                Matrix<Data> tmp_mtr{(*this)};
+                Matrix tmp_mtr{(*this)};
 
                 Gauss_algo(tmp_mtr, &swap_counter, &is_zero);
 
                 if (is_zero)
                     return 0;
 
-                Data res = swap_counter*Diag_mul(tmp_mtr);
+                float res = swap_counter*Diag_mul(tmp_mtr);
 
                 return res;
             }
@@ -504,7 +583,7 @@ namespace Linear_space
             }
 
             //! Function for mul matrix rows
-            void mul_rows_to_sclr(uint i, Data value)
+            void mul_rows_to_sclr(uint i, float value)
             {
                 assert(i >= 0);
                 assert(i < (*this).rows);
@@ -518,56 +597,13 @@ namespace Linear_space
 
     //! Also binary reloaded operators for working with matrix
 
-    template <typename Data>
-    std::ostream& operator <<(std::ostream &os, Matrix<Data>& matr)
-    {
-        for (size_t i = 0; i < matr.nrows(); ++i)
-        {
-           // os << "|| ";
-
-            for (size_t j = 0; j < matr.nclmns(); ++j)
-                os << matr[i][j] << " ";
-
-            os << std::endl;
-        }
-
-        return os;
-    }
-
-    template <typename Data>
-    Matrix<Data> operator +(const Matrix<Data>& lhs, const Matrix<Data>& rhs)
-    {
-        Matrix<Data> res{lhs};
-
-        res += rhs;
-        return res;
-    }
-
-    template <typename Data>
-    Matrix<Data> operator -(const Matrix<Data>& lhs, const Matrix<Data>& rhs)
-    {
-        Matrix<Data> res{lhs};
-
-        res -= rhs;
-        return res;
-    }
-
-    template <typename Data>
-    Matrix<Data> operator *(const Matrix<Data>& lhs, const Matrix<Data>& rhs)
-    {
-        Matrix<Data> res{lhs};
-
-        res *= rhs;
-        return res;
-    }
-
-    using type = float;
-    using Matr_flt = Linear_space::Matrix<type>;
-
-
+    Matrix operator* (const Matrix& lhs, const Matrix& rhs);
+    Matrix operator -(const Matrix& lhs, const Matrix& rhs);
+    Matrix operator +(const Matrix& lhs, const Matrix& rhs);
+    std::ostream& operator <<(std::ostream &os, Matrix& matr);
 }
 
 
 
 
-#endif //MATRIX_MATRIX_H
+#endif //{MATRIX_MATRIX_H}

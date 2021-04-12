@@ -366,6 +366,28 @@ namespace Linear_space
 
     public:
 
+            //! Function for vectorization matrix
+            void vectorize(std::vector<int>& mtr_buf)
+            {
+               // uint rows = mtr.nrows(), cols = mtr.nclmns();
+
+                mtr_buf.reserve(rows * clmns);
+
+                for (uint i = 0; i < rows; ++i)
+                    for (uint j = 0; j < clmns; ++j)
+
+                        mtr_buf.push_back(matrix[i][j]);
+            }
+
+            void set_zero()
+            {
+                for (uint i = 0; i < rows; ++i)
+                    for (uint j = 0; j < clmns; ++j)
+                        matrix[i][j] = 0;
+            }
+
+
+
             //! Function for mul diagonal elements
             Data Diag_mul(const Matrix& mtr)
             {
