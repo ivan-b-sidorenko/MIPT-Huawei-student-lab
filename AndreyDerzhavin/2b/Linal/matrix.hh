@@ -4,11 +4,16 @@
 #include <iostream>
 #include <cmath>
 #include <cassert>
+#include <vector>
 
 
 namespace linal
 {
   using ldbl = long double;
+  template <typename T>
+  class Matrix;
+
+  using Mat = Matrix<int>;
 
   constexpr ldbl MAT_THRESHOLD = 1e-10;
 
@@ -23,8 +28,9 @@ namespace linal
     //using empl_func = T (*)( int, int );
 
   public:
+    Matrix( void ) = default;
 
-    Matrix( size_t rows = 0, size_t cols = 0 );
+    Matrix( size_t rows, size_t cols );
 
     template <typename It>
     Matrix( size_t rows, size_t cols, It begin, It end );
@@ -181,7 +187,8 @@ linal::Matrix<T>::Matrix( linal::Matrix<T> &&matr ) : matr_(matr.matr_),
                                                   cols_(matr.cols_)
 {
   matr.matr_ = nullptr;
-  matr.rows_ = matr.cols_ = 0;
+  matr.rows_ = 0;
+  matr.cols_ = 0;
 }
 
 template <typename T>
