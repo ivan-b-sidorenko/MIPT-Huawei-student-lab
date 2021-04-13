@@ -1,17 +1,16 @@
 CXX = g++
-#CXXFLAGS = -c -Wall -O0 -std=c++14
 
 
 all: main
 
 main: main.o tensor.o
-	 $(CXX) main.o tensor.o -o main -lpthread
+	 $(CXX) main.o tensor.o -O0 -o main -lpthread
 
 main.o: main.cpp
-	 $(CXX) -c main.cpp
+	 $(CXX) -c -O0 main.cpp -lpthread
 
 tensor.o: tensor.cpp
-	 $(CXX) -c tensor.cpp -lptrhead
+	 $(CXX) -c -O0 tensor.cpp -lpthread
 
 clean:
 	rm -rf *.o
