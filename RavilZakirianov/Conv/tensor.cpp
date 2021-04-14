@@ -53,6 +53,41 @@ namespace linear {
             }
         }
     }
+    
+
+    Matrix::Matrix(int _row, int _col, std::vector<linear::Matrix>& A) {
+        row = _row;
+        col = _col;
+        int chan = A.size();
+        arr = new float*[row];
+        for(int i = 0; i < row; ++i) {
+            arr[i] = new float[col];
+        }
+        for(int k = 0; k < chan; ++k) {
+            int num_i = 0;
+            int num_j = 0;
+            for(int i = 0; i < A[0].get_row() - 3; ++i) {
+                for(int j = 0; j < ( A[0].get_col() - 3 ); ++j) {
+                    for(int start_num_i = i; start_num_i < i + 4; ++start_num_i) {
+                        for(int start_num_j = j; start_num_j < j + 4; ++start_num_j) {
+                            arr[num_i][num_j + (k * col / chan)] = A[k].arr[start_num_i][start_num_j];
+                            num_i++;
+                        }
+                    }
+                    num_i = 0;
+                    num_j++;
+                }
+            }
+        }
+    }
+    
+    void Matrix::transpone(const linear::Matrix& A) {
+        for(int i = 0; i < row; ++i) {
+            for(int j = 0; j < col; ++j) {
+                arr[i][j] = A.arr[j][i];
+            }
+        }
+    }
 
     Matrix::Matrix(const linear::Matrix& A) {
         row = A.get_row();
@@ -67,6 +102,54 @@ namespace linear {
             }
         }
     }
+        
+    Matrix& Matrix::matrix_intr_mul(const linear::Matrix& B, linear::Matrix& result) {
+        return result;
+
+    }
+
+
+    void Matrix::matrix_mul(const linear::Matrix& right, linear::Matrix& result) {
+        int M = result.get_row();
+        int N = result.get_col();
+        int num = 0;
+        float c = 0;
+        for(int j = 0; j < N; ++j) {
+            float Y[col];           //столбец
+            for(int q = 0; q < col; ++q) {
+                Y[q] = right.arr[q][num];
+            }
+            num++;
+            for(int i = 0; i < M; ++i) {            //ускорение перестановкой циклов, вынос переменных
+                c = 0;
+                int k = 7;
+                while ( k < col ) {                 //loop unrolling
+                    c += arr[i][k-7] * Y[k-7];
+                    c += arr[i][k-6] * Y[k-6];
+                    c += arr[i][k-5] * Y[k-5];
+                    c += arr[i][k-4] * Y[k-4];
+                    c += arr[i][k-3] * Y[k-3];
+                    c += arr[i][k-2] * Y[k-2];
+                    c += arr[i][k-1] * Y[k-1];
+                    c += arr[i][k] * Y[k];
+                    k += 8;
+                }
+                k -= 8;
+                if ( col < 8 ) {                                              //ch
+                    for(int ik = 0; ik < col; ++ik) {
+                        c += arr[i][ik] * Y[ik];
+                    }
+                }
+                else if ( col % 8 != 0 ) { 
+                    for(int ik = k + 1; ik < col; ++ik) {
+                        c += arr[i][ik] * Y[ik];
+                    }
+                }
+                result.arr[i][j] = c;
+            }
+        }
+    }
+        
 
     bool Matrix::add_matrix(const linear::Matrix& A) {
         if ( ( row != A.get_row() ) & ( col != A.get_col() ) ) {
@@ -79,18 +162,6 @@ namespace linear {
         }
         return true;
     }
-
-    /*               Здесь небольшие ускорения, связанные с выносом переменной за тело цикла(ускорение для наивной около 4%)
-    float opt_count(linear::Matrix& A, linear::Matrix& Ker, int i, int j) {
-        float sum = 0;
-        for(int k = i; k < i + 4; ++k) {
-            for(int p = j; p < j + 4; ++p) {
-                sum += A.arr[k][p] * Ker.arr[k - i][p - j];
-            }
-        }   
-        return sum;
-    }
-    */    
 
     float count(linear::Matrix& A, linear::Matrix& Ker, int i, int j) {
         float sum = 0;
@@ -116,18 +187,28 @@ namespace linear {
         return result;
     }
     
-    /*          Добавлю позже 
-    linear::Matrix& Matrix::Matrix::matrix_opt_conv(std::vector<linear::Matrix>& A, std::vector<linear::Matrix>& Kernel, linear::Matrix& result) {
-        int R = result.get_row();
-        int C = result.get_col();
-        for(int i = 0; i < R; ++i) {
-            for(int j = 0; j < C; ++j) {
-                //result.arr[i][j] = opt_count(A, Kernel, i, j);
+    float sum_filter(linear::Matrix& A, int num) {
+        float reply = 0.0;
+        for(int i = 0; i < A.get_col(); ++i) {
+            reply += A.arr[num][i];
+        }
+        return reply;
+    }
+
+    ML::Tensor& col2im(linear::Matrix& A, ML::Tensor& result) {
+        int num = 0;
+        for(int k = 0; k < result.get_channel(); ++k) {
+            for(int i = 0; i < result.get_width(); ++i) {
+                for(int j = 0; j < result.get_height(); ++j) {
+                    result.batches[0].Matrixs[k].arr[i][j] = sum_filter(A, num);
+                    num++;
+                }
             }
         }
         return result;
+
     }
-    */
+    
     bool Matrix::compare(linear::Matrix& M) const {
         for(int i = 0; i < M.get_row(); ++i) {
             for(int j = 0; j < M.get_col(); ++j) {
@@ -138,7 +219,6 @@ namespace linear {
         }
         return true;
     }
-
 
     int Matrix::get_row() const {
         return row;
@@ -276,6 +356,21 @@ namespace ML {
         }
         return result;
     }
+    
+
+    ML::Tensor& Tensor::gemm(ML::Tensor& Kernel, ML::Tensor& result) {
+        int row1 = channel;
+        int col2 = result.get_channel() * result.get_width() * result.get_height();
+        linear::Matrix M1(16, row1, Kernel.batches[0].Matrixs);
+        linear::Matrix M2(16, col2, batches[0].Matrixs);
+        linear::Matrix M3(col2, 16, 0.0);
+        M3.transpone(M2);
+        linear::Matrix result1(col2, channel, 0.0);
+        M3.matrix_mul(M1, result1);   
+        result = col2im(result1, result);
+        return result;
+    }
+    
     
     void mini_opt_conv(int begin, int end, std::vector<linear::Matrix> Matrixs, ML::Tensor Kernel, std::vector<linear::Matrix>& M) {
         int row = Matrixs[0].get_row();
