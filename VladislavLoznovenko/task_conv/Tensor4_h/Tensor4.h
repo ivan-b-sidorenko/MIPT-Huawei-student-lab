@@ -14,6 +14,7 @@ private:
 public:
 	Tensor4(int num_b , int num_m , int num_h , int num_w);
 	Tensor4(int num_b , int num_m , int num_h , int num_w , int mod);
+	Tensor4(int start_h , int num_h , Tensor4& rhs);
 	Tensor4(const Tensor4& rhs);
 	~Tensor4() {};
 
@@ -28,5 +29,8 @@ public:
 	Chanel& operator[](const int rhs) {return butches[rhs];};
 	friend std::ostream& operator<<(std::ostream& out , Tensor4& rhs);
 };
+
+Tensor4 merge_ten(std::vector<Tensor4> rhs);
+void add_ten(Tensor4& for_add , Tensor4& result , int counter);
 
 };

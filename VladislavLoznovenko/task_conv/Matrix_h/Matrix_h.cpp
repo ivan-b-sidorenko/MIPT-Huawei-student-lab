@@ -22,7 +22,7 @@ Matrix::Matrix(int str , int col , int mod)
 	num_str = str;
 	num_col = col;
 
-	mrx = new float*[num_str];
+	mrx = new float*[str];
 
 	for (int i = 0 ; i < num_str ; ++i)
 		mrx[i] = new float[col];
@@ -40,7 +40,7 @@ Matrix::Matrix(const Matrix& rhs)
 	mrx = new float*[num_str];
 
 	for (int i = 0 ; i < num_str ; ++i)
-		mrx[i] = new float[num_str];
+		mrx[i] = new float[num_col];
 
 	for (int i = 0 ; i < num_str ; i++)
 		for (int j = 0 ; j < num_col ; j++)
@@ -78,6 +78,20 @@ int Matrix::find_max()
 				max = mrx[i][j];
 
 	return max;
+}
+
+Matrix merge_mrx(std::vector<Matrix> rhs)
+{
+	Matrix res(rhs[0].get_num_str() * rhs.size() , rhs[0].get_num_col());
+	int counter = 0;
+	for (auto it = rhs.begin() ; it != rhs.end() ; ++it)
+	{
+		for (int i = 0 ; i < it->get_num_str() ; ++i)
+			for (int j = 0 ; j < it->get_num_col() ; ++j)
+				res[counter * it->get_num_str() + i][j] = (*it)[i][j];
+		counter++;
+	}
+	return res;
 }
 
 void sum(Matrix& A , Matrix& B , Matrix& res)
@@ -187,6 +201,16 @@ void Matrix_product(const Matrix& lhs , const Matrix& rhs , Matrix& result)
 			sum = 0;
 		};
 	};
+}
+
+int elem_sum(matrix::Matrix& lhs , matrix::Matrix& rhs)
+{
+	int sum = 0;
+	for (int i = 0 ; i < lhs.get_num_str() ; ++i)
+		for (int j = 0 ; j < lhs.get_num_col() ; ++j)
+			sum += lhs[i][j] * rhs[i][j];
+
+	return sum;
 }
 
 void Matrix_product_fast(const Matrix& lhs , const Matrix& rhs , Matrix& result)
