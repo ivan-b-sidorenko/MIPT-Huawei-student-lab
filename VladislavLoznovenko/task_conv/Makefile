@@ -5,8 +5,8 @@ CXXFLAGS = -c -Wall -O0 -std=c++14 -MD -mavx -mfma
 
 all: main
 
-main: main.o Chanel_h.o Matrix_h.o Tensor4.o Conv_naiv.o Conv_fast.o Conv_GEMM.o
-	 $(CXX) Tensor4.o Chanel_h.o Matrix_h.o Conv_naiv.o Conv_fast.o Conv_GEMM.o main.o -o $@
+main: main.o Chanel_h.o Matrix_h.o Tensor4.o Conv_naiv.o Conv_fast.o Conv_GEMM.o Conv_Vinograd.o
+	 $(CXX) Tensor4.o Chanel_h.o Matrix_h.o Conv_naiv.o Conv_fast.o Conv_GEMM.o Conv_Vinograd.o main.o -o $@
 
 Matrix_h.o: Matrix_h/Matrix_h.cpp
 	 $(CXX) Matrix_h/Matrix_h.cpp $(CXXFLAGS)
@@ -25,6 +25,9 @@ Conv_fast.o: Convolutions_h/Conv_fast.cpp
 
 Conv_GEMM.o: Convolutions_h/Conv_GEMM.cpp
 	 $(CXX) Convolutions_h/Conv_GEMM.cpp $(CXXFLAGS)
+
+Conv_Vinograd.o: Convolutions_h/Conv_Vinograd.cpp
+	 $(CXX) Convolutions_h/Conv_Vinograd.cpp $(CXXFLAGS)
 
 main.o: main.cpp
 	 $(CXX) main.cpp $(CXXFLAGS)
