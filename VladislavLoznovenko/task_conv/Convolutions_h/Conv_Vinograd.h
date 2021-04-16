@@ -13,4 +13,4 @@ std::vector<Matrix> Win_mrx();
 Tensor4 convolution_layer_Win(Tensor4& for_conv , Tensor4& filter , std::vector<Matrix>& convert);
 void treatment_Win(Chanel& chanel , Tensor4& kernels , Chanel& result , std::vector<Matrix>& convert);
 void make_chan_Win(Chanel& chanel , Chanel& kernel , Matrix& result , std::vector<Matrix>& convert);
-void Win_equation(Matrix& block , Matrix kernel , std::vector<Matrix>& convert);
+void Win_formule(Matrix& block , Matrix kernel , std::vector<Matrix>& convert);

@@ -16,7 +16,7 @@ int main()
 	uint64_t duration_WIN = 0;
 	my_time::Timer clock;
 
-	Tensor4 test(1 , 3 , 101 , 100 , 0);
+	Tensor4 test(1 , 3 , 100 , 100 , 0);
 	Tensor4 filter(3 , 3 , 3 , 3 , 0);
 	std::vector<Matrix> Win = Win_mrx();
 

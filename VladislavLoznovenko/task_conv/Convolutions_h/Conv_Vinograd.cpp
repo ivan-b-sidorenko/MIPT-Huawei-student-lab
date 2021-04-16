@@ -1,5 +1,6 @@
 #include "Conv_Vinograd.h"
 
+//Make vector of Matrix for Winograd F(2x2 , 3x3)
 std::vector<Matrix> Win_mrx()
 {
 	std::vector<float> AT_ = {1 , 1 , 1 , 0 , 0 , 1 , -1 , -1};
@@ -46,13 +47,15 @@ void make_chan_Win(Chanel& chanel , Chanel& kernel , Matrix& result , std::vecto
 		for (int i = 0 ; i < (chanel.get_high() - 2) / 2 ; ++i)
 			for (int j = 0 ; j < (chanel.get_width() - 2) / 2 ; ++j)
 			{
+				//Take matrix 4x4 and use formule for Winograd
 				Matrix for_Win(chanel[chan] , 4 , 4 , i * 2 , j * 2);
-				Win_equation(for_Win , kernel[chan] , convert);
+				Win_formula(for_Win , kernel[chan] , convert);
 				for (int i_ = 0 ; i_ < 2 ; ++i_)
 					for (int j_ = 0 ; j_ < 2 ; ++j_)
 						res_per[i * 2 + i_][j * 2 + j_] = for_Win[i_][j_];
 			}
 
+		//ifы for Tensor with odd parameters
 		if ((chanel.get_high() % 2) != 0)
 		{
 			for (int i = res_per.get_num_str() - 1 ; i < res_per.get_num_str() ; ++i)
@@ -76,7 +79,7 @@ void make_chan_Win(Chanel& chanel , Chanel& kernel , Matrix& result , std::vecto
 	}
 }
 
-void Win_equation(Matrix& block , Matrix kernel , std::vector<Matrix>& convert)
+void Win_formule(Matrix& block , Matrix kernel , std::vector<Matrix>& convert)
 {
 	kernel = Matrix_product_fast(Matrix_product_fast(convert[G] , kernel) , convert[GT]);
 	
