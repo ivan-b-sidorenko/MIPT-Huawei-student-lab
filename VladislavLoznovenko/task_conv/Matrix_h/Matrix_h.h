@@ -17,6 +17,7 @@ private:
 public:
 	Matrix(int str , int col);
 	Matrix(int str , int col , int mod);
+	Matrix(int str , int col , std::vector<float>& val);
 	Matrix(const Matrix& rhs , int str , int col , int start_str , int start_col);
 	Matrix(const Matrix& rhs);
 	~Matrix();
@@ -24,6 +25,7 @@ public:
 	int get_num_col() const {return num_col;};
 	int get_num_str() const {return num_str;};
 	int find_max();
+	Matrix transpose();
 	void set_zero();
 	void cleanup();
 
@@ -36,8 +38,9 @@ public:
 
 void sum(Matrix& A , Matrix& B , Matrix& res);
 Matrix merge_mrx(std::vector<Matrix> rhs);
-int elem_sum(matrix::Matrix& lhs , matrix::Matrix& rhs);
+int elem_sum(Matrix& lhs , Matrix& rhs);
+void logic_product(Matrix& lhs , Matrix& rhs , Matrix& res);
 void Matrix_product(const Matrix& lhs , const Matrix& rhs , Matrix& result);
-void Matrix_product_fast(const Matrix& lhs , const Matrix& rhs , Matrix& result);
+Matrix Matrix_product_fast(const Matrix& lhs , const Matrix& rhs);
 
 };

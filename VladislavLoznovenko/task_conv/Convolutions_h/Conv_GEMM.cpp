@@ -81,7 +81,7 @@ matrix::Matrix make_GEMM(Tensor4& f_map , Tensor4& filter)
 
 	matrix::Matrix OFmap(IFmap.get_num_str() , fil_matrix.get_num_col());
 
-	matrix::Matrix_product_fast(IFmap , fil_matrix , OFmap);
+	OFmap = matrix::Matrix_product_fast(IFmap , fil_matrix);
 
 	return OFmap;
 }
