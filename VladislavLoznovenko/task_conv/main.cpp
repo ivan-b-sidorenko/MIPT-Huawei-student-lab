@@ -17,7 +17,7 @@ int main()
 	my_time::Timer clock;
 
 	Tensor4 test(1 , 3 , 100 , 100 , 0);
-	Tensor4 filter(3 , 3 , 3 , 3 , 0);
+	Tensor4 filter(25 , 3 , 3 , 3 , 0);
 	std::vector<Matrix> Win = Win_mrx();
 
 	for (int i = 0 ; i < 5 ; ++i)
@@ -30,8 +30,9 @@ int main()
 		Tensor4 res_2 = conv_layer_fast(test , filter);
 		duration_fast += clock.get_mls();
 
+		Matrix filter_m = GEMM_ker(filter);
 		clock.restart();
-		Tensor4 res_3 = conv_layer_GEMM(test , filter);
+		Tensor4 res_3 = conv_layer_GEMM(test , filter_m , filter);
 		duration_GEMM += clock.get_mls();
 
 		clock.restart();

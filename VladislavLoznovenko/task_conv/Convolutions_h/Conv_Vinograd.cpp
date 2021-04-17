@@ -49,7 +49,7 @@ void make_chan_Win(Chanel& chanel , Chanel& kernel , Matrix& result , std::vecto
 			{
 				//Take matrix 4x4 and use formule for Winograd
 				Matrix for_Win(chanel[chan] , 4 , 4 , i * 2 , j * 2);
-				Win_formula(for_Win , kernel[chan] , convert);
+				Win_formule(for_Win , kernel[chan] , convert);
 				for (int i_ = 0 ; i_ < 2 ; ++i_)
 					for (int j_ = 0 ; j_ < 2 ; ++j_)
 						res_per[i * 2 + i_][j * 2 + j_] = for_Win[i_][j_];
