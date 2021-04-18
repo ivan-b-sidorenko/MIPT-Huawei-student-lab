@@ -58,7 +58,7 @@ void reverse_GEMM(matrix::Matrix& OFmap , Tensor4& result)
 					result[butch][chan][i][j] = OFmap[butch * result.get_high() * result.get_width() + i * result.get_width() + j][chan];
 }
 
-Tensor4 conv_layer_GEMM(Tensor4& f_map , Tensor4& filter)
+Tensor4 conv_layer_GEMM(Tensor4& f_map , matrix::Matrix& filter_m , Tensor4& filter)
 {
 
 	int new_h = f_map.get_high() - filter.get_high() + 1;
@@ -66,7 +66,7 @@ Tensor4 conv_layer_GEMM(Tensor4& f_map , Tensor4& filter)
 
 	Tensor4 result(f_map.get_num_butch() , filter.get_num_butch() , new_h , new_w);
 
-	matrix::Matrix OFmap_ = make_GEMM(f_map , filter);
+	matrix::Matrix OFmap_ = make_GEMM(f_map , filter_m , filter);
 	//std::cout << OFmap;
 
 	reverse_GEMM(OFmap_ , result);
@@ -74,14 +74,14 @@ Tensor4 conv_layer_GEMM(Tensor4& f_map , Tensor4& filter)
 	return result;
 }
 
-matrix::Matrix make_GEMM(Tensor4& f_map , Tensor4& filter)
+matrix::Matrix make_GEMM(Tensor4& f_map , matrix::Matrix& filter_m , Tensor4& filter)
 {
 	matrix::Matrix IFmap = GEMM_ten(f_map , filter);
-	matrix::Matrix fil_matrix = GEMM_ker(filter);
+	//matrix::Matrix fil_matrix = GEMM_ker(filter);
 
-	matrix::Matrix OFmap(IFmap.get_num_str() , fil_matrix.get_num_col());
+	matrix::Matrix OFmap(IFmap.get_num_str() , filter_m.get_num_col());
 
-	matrix::Matrix_product_fast(IFmap , fil_matrix , OFmap);
+	OFmap = matrix::Matrix_product_fast(IFmap , filter_m);
 
 	return OFmap;
 }

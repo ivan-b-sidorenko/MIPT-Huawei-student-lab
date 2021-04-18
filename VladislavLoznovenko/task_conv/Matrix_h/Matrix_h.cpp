@@ -32,6 +32,21 @@ Matrix::Matrix(int str , int col , int mod)
 			mrx[i][j] = rand() % 3;
 }
 
+Matrix::Matrix(int str , int col , std::vector<float>& val)
+{
+	num_str = str;
+	num_col = col;
+
+	mrx = new float*[str];
+
+	for (int i = 0 ; i < num_str ; ++i)
+	{
+		mrx[i] = new float[col];
+		for (int j = 0 ; j < num_col ; ++j)
+			mrx[i][j] = val[i * num_col + j];
+	}
+}
+
 Matrix::Matrix(const Matrix& rhs)
 {
 	num_str = rhs.get_num_str();
@@ -67,6 +82,16 @@ void Matrix::set_zero()
 	for (int i = 0 ; i < num_str ; i++)
 		for (int j = 0 ; j < num_col ; j++)
 			mrx[i][j] = 0;
+}
+
+Matrix Matrix::transpose()
+{
+	Matrix res(num_col , num_str);
+	for (int i = 0 ; i < num_str ; ++i)
+		for (int j = 0 ; j < num_col ; ++j)
+			res[j][i] = mrx[i][j];
+
+	return res;
 }
 
 int Matrix::find_max()
@@ -126,8 +151,8 @@ Matrix& Matrix::operator=(const Matrix& rhs)
 		cleanup();
 		mrx = new float*[rhs.get_num_str()];
 
-		for (int i = 0 ; i < rhs.get_num_col() ; ++i)
-			mrx[i] = new float[rhs.get_num_str()];
+		for (int i = 0 ; i < rhs.get_num_str() ; ++i)
+			mrx[i] = new float[rhs.get_num_col()];
 
 		num_col = rhs.get_num_col();
 		num_str = rhs.get_num_str();
@@ -179,6 +204,16 @@ std::istream& operator>>(std::istream& in , Matrix& rhs)
 	return in;
 }
 
+void logic_product(Matrix& lhs , Matrix& rhs , Matrix& res)
+{
+	assert(lhs.get_num_col() == rhs.get_num_col());
+	assert(lhs.get_num_str() == rhs.get_num_str());
+
+	for (int i = 0 ; i < lhs.get_num_str() ; ++i)
+		for (int j = 0 ; j < lhs.get_num_col() ; ++j)
+			res[i][j] = lhs[i][j] * rhs[i][j];
+}
+
 void Matrix_product(const Matrix& lhs , const Matrix& rhs , Matrix& result)
 {
 	result.set_zero();
@@ -213,9 +248,9 @@ int elem_sum(matrix::Matrix& lhs , matrix::Matrix& rhs)
 	return sum;
 }
 
-void Matrix_product_fast(const Matrix& lhs , const Matrix& rhs , Matrix& result)
+Matrix Matrix_product_fast(const Matrix& lhs , const Matrix& rhs)
 {
-	result.set_zero();
+	Matrix result(lhs.get_num_str() , rhs.get_num_col());
 	int lhs_col = lhs.get_num_col();
 	int lhs_str = lhs.get_num_str();
 	int rhs_col = rhs.get_num_col();
@@ -249,6 +284,7 @@ void Matrix_product_fast(const Matrix& lhs , const Matrix& rhs , Matrix& result)
 				res[k] += row_rhs[k] * per_lhs;
 		}
 	}
+	return result;
 }
 
 };
