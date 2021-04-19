@@ -2,8 +2,7 @@
 #include <thread>
 #include <ratio>
 
-namespace my_time
-{
+namespace my_time{
 
 class Timer final
 {
