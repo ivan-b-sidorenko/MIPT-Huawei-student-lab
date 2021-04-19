@@ -44,15 +44,15 @@ void make_chan_Win(Chanel& chanel , Chanel& kernel , Matrix& result)
 	int chanel_h_Win = (chanel.get_high() - 2) / 2;
 	int chanel_w_Win = (chanel.get_width() - 2) / 2;
 
+	Matrix res_per(result.get_num_str() , result.get_num_col());
+	Matrix res_per_Win(4 , 4);
+	Matrix block_per(4 , 4);
+	Matrix res_Win(2 , 2);
+
 	for (int chan = 0 ; chan < kernels ; ++chan)
 	{
-		Matrix res_per(result.get_num_str() , result.get_num_col());
-		Matrix res_per_Win(4 , 4);
-		Matrix block_per(4 , 4);
-		Matrix res_Win(2 , 2);
-
 		GgGt(kernel[chan] , res_per_Win);
-		
+
 		for (int i = 0 ; i < chanel_h_Win ; ++i)
 			for (int j = 0 ; j < chanel_w_Win ; ++j)
 			{
