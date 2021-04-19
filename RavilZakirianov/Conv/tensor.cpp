@@ -63,11 +63,13 @@ namespace linear {
         for(int i = 0; i < row; ++i) {
             arr[i] = new float[col];
         }
+        int A_ROW = A[0].get_row() - 3;
+        int A_COL = A[0].get_col() - 3;
         for(int k = 0; k < chan; ++k) {
             int num_i = 0;
             int num_j = 0;
-            for(int i = 0; i < A[0].get_row() - 3; ++i) {
-                for(int j = 0; j < ( A[0].get_col() - 3 ); ++j) {
+            for(int i = 0; i < A_ROW; ++i) {
+                for(int j = 0; j < ( A_COL ); ++j) {
                     for(int start_num_i = i; start_num_i < i + 4; ++start_num_i) {
                         for(int start_num_j = j; start_num_j < j + 4; ++start_num_j) {
                             arr[num_i][num_j + (k * col / chan)] = A[k].arr[start_num_i][start_num_j];
@@ -104,10 +106,101 @@ namespace linear {
     }
         
     Matrix& Matrix::matrix_intr_mul(const linear::Matrix& B, linear::Matrix& result) {
+        //add
         return result;
 
     }
 
+     void mini_mul(const linear::Matrix& A, const linear::Matrix& B, int m1, int m2, int k1, int k2, int len, linear::Matrix& result) {
+        int M = result.get_row();
+        int N = result.get_col();
+        int num = k1;
+        float c = 0;
+        for(int j = 0; j < N; ++j) {
+            float Y[len];           //столбец
+            for(int q = 0; q < len; ++q) {
+                Y[q] = B.arr[q][num];
+            }
+            num++;
+            for(int i = 0; i < M; ++i) {            //ускорение перестановкой циклов, вынос переменных
+                c = 0;
+                int k = 7;
+                while ( k < len ) {                 //loop unrolling
+                    c += A.arr[m1 + i][k-7] * Y[k-7];
+                    c += A.arr[m1 + i][k-6] * Y[k-6];
+                    c += A.arr[m1 + i][k-5] * Y[k-5];
+                    c += A.arr[m1 + i][k-4] * Y[k-4];
+                    c += A.arr[m1 + i][k-3] * Y[k-3];
+                    c += A.arr[m1 + i][k-2] * Y[k-2];
+                    c += A.arr[m1 + i][k-1] * Y[k-1];
+                    c += A.arr[m1 + i][k] * Y[k];
+                    k += 8;
+                }
+                k -= 8;
+                if ( len < 8 ) {                                              //ch
+                    for(int ik = 0; ik < len; ++ik) {
+                        c += A.arr[m1 + i][ik] * Y[ik];
+                    }
+                }
+                else if ( len % 8 != 0 ) {
+                    for(int ik = k + 1; ik < len; ++ik) {
+                        c += A.arr[m1 + i][ik] * Y[ik];
+                    }
+                }
+                result.arr[i][j] = c;
+            }
+        }
+    }
+
+    void union_matrix(linear::Matrix& result, linear::Matrix& res1, linear::Matrix& res2, linear::Matrix& res3, linear::Matrix& res4) {
+        int m1 = res1.get_row();                                                                    //WORK
+        int k1 = res1.get_col();
+        int m = result.get_row();
+        int k = result.get_col();
+        int k2 = res2.get_col();
+        for(int i = 0; i < m1; ++i) {
+            for(int j = 0; j < k1; ++j) {
+                result.arr[i][j] = res1.arr[i][j];
+            }
+        }
+        for(int i = 0; i < m1; ++i) {
+            for(int j = k1; j < k; ++j) {
+                result.arr[i][j] = res2.arr[i][j - k1];
+            }
+        }
+        for(int i = m1; i < m; ++i) {
+            for(int j = 0; j < k1; ++j) {
+                result.arr[i][j] = res3.arr[i - m1][j];
+            }
+        }
+        for(int i = m1; i < m; ++i) {
+            for(int j = k1; j < k; ++j) {
+                result.arr[i][j] = res4.arr[i - m1][j - k1];
+            }
+        }
+    }
+
+    void Matrix::matrix_mul_thread(const linear::Matrix& right, linear::Matrix& result) {
+        std::vector<std::thread> threads;
+        int m1 = row / 2;
+        int m2 = row - m1;
+        int k1 = right.get_col() / 2;
+        int k2 = right.get_col() - k1;
+        int len = right.row;
+        linear::Matrix left(row, col, arr);
+        linear::Matrix result1(m1, k1);
+        linear::Matrix result2(m1, k2);
+        linear::Matrix result3(m2, k1);
+        linear::Matrix result4(m2, k2);
+        threads.push_back(std::thread(mini_mul, std::ref(left), std::ref(right), 0, m1, 0, k1, len, std::ref(result1)));
+        threads.push_back(std::thread(mini_mul, std::ref(left), std::ref(right), 0, m1, k1, k1 + k2, len, std::ref(result2)));
+        threads.push_back(std::thread(mini_mul, std::ref(left), std::ref(right), m1, 0, 0, k1, len, std::ref(result3)));
+        threads.push_back(std::thread(mini_mul, std::ref(left), std::ref(right), m1, m1 + m2, k1, k1 + k2, len, std::ref(result4)));
+        for(std::thread& t : threads) {
+            t.join();
+        }
+        union_matrix(result, result1, result2, result3, result4);
+    }
 
     void Matrix::matrix_mul(const linear::Matrix& right, linear::Matrix& result) {
         int M = result.get_row();
@@ -187,23 +280,28 @@ namespace linear {
         return result;
     }
     
-    float sum_filter(linear::Matrix& A, int num) {
+    float sum_filter(linear::Matrix& A, int num, int num_ker, int step) {
         float reply = 0.0;
-        for(int i = 0; i < A.get_col(); ++i) {
-            reply += A.arr[num][i];
+        int A_COL = A.get_col();
+        for(int i = num; i < A_COL; i += step) {
+            reply += A.arr[0][i];
         }
         return reply;
     }
 
     ML::Tensor& col2im(linear::Matrix& A, ML::Tensor& result) {
         int num = 0;
-        for(int k = 0; k < result.get_channel(); ++k) {
-            for(int i = 0; i < result.get_width(); ++i) {
-                for(int j = 0; j < result.get_height(); ++j) {
-                    result.batches[0].Matrixs[k].arr[i][j] = sum_filter(A, num);
+        int W = result.get_width();
+        int H = result.get_height();
+        int C = result.get_channel();
+        for(int k = 0; k < C; ++k) {
+            for(int i = 0; i < W; ++i) {
+                for(int j = 0; j < H; ++j) {
+                    result.batches[0].Matrixs[k].arr[i][j] = sum_filter(A, num, k, W * H);
                     num++;
                 }
             }
+            num = 0;
         }
         return result;
 
@@ -358,15 +456,12 @@ namespace ML {
     }
     
 
-    ML::Tensor& Tensor::gemm(ML::Tensor& Kernel, ML::Tensor& result) {
-        int row1 = channel;
-        int col2 = result.get_channel() * result.get_width() * result.get_height();
-        linear::Matrix M1(16, row1, Kernel.batches[0].Matrixs);
-        linear::Matrix M2(16, col2, batches[0].Matrixs);
-        linear::Matrix M3(col2, 16, 0.0);
-        M3.transpone(M2);
-        linear::Matrix result1(col2, channel, 0.0);
-        M3.matrix_mul(M1, result1);   
+    ML::Tensor& Tensor::gemm(ML::Tensor& Kernel, ML::Tensor& result, linear::Matrix& M2) {
+        int col2 = ( height - Kernel.get_height() + 1 ) * ( width - Kernel.get_width() + 1 ) * channel;
+        int row1 = Kernel.get_num_batch();
+        linear::Matrix M1(Kernel.get_width() * Kernel.get_height(), col2, batches[0].Matrixs);
+        linear::Matrix result1(M2.get_row(), M1.get_col(), 0.0);
+        M2.matrix_mul_thread(M1, result1);
         result = col2im(result1, result);
         return result;
     }

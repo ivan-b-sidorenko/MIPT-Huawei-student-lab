@@ -39,9 +39,10 @@ void TEST3(int K, int C, int H, int W, float** arr, linear::Matrix& M, ML::Tenso
     ML::Batch inp(M, C); 
     ML::Batch ker(Ker, C); 
     ML::Tensor input(inp, 1); 
-    ML::Tensor kernel(ker, K); 
+    ML::Tensor kernel(ker, K);
+    linear::Matrix M2(kernel.get_num_batch(), kernel.get_height() * kernel.get_width(), 0.5);
     auto begin = std::chrono::steady_clock::now();
-    result = input.gemm(kernel, result);
+    result = input.gemm(kernel, result, M2);
     auto end = std::chrono::steady_clock::now();
     auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
     std::cout << "The optimization Gemm time: " << elapsed_ms.count() << " ms\n";
@@ -86,8 +87,8 @@ int main() {
         }
     }
     TEST1(K, C, H, W, arr, M, result1);
-    TEST2(K, C, H, W, arr, M, result2);
     TEST3(K, C, H, W, arr, M, result3);
+    TEST2(K, C, H, W, arr, M, result2);
     compare(result1, result2, result3);
     for(int i = 0; i < 4; ++i) {
         delete[] arr[i];

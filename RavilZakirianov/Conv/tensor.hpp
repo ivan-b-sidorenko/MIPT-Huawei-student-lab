@@ -31,6 +31,7 @@ namespace linear {
             void print() const;
             Matrix& matrix_intr_mul(const linear::Matrix& B, linear::Matrix& result);
             void matrix_mul(const linear::Matrix& B, linear::Matrix& result);
+            void matrix_mul_thread(const linear::Matrix& right, linear::Matrix& result);
             Matrix& matrix_conv(std::vector<linear::Matrix>& input, std::vector<linear::Matrix>& Ker, Matrix& result);
             Matrix& matrix_opt_conv(std::vector<linear::Matrix>& input, std::vector<linear::Matrix>& Ker, Matrix& result);
             Matrix& win_matrix_conv(std::vector<linear::Matrix>& input, std::vector<linear::Matrix>& Ker, Matrix& result);
@@ -75,7 +76,7 @@ namespace ML {
             ML::Tensor& winograd_conv(Tensor& Kernel, Tensor& result);
             void print() const;
             bool compare(ML::Tensor& tensor) const;
-            ML::Tensor& gemm(ML::Tensor& Kernel, ML::Tensor& result);
+            ML::Tensor& gemm(ML::Tensor& Kernel, ML::Tensor& result, linear::Matrix& M2);
             int get_width() const;
             int get_height() const;
             int get_channel() const;
