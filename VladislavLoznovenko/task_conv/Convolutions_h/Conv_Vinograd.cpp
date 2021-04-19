@@ -46,8 +46,13 @@ void make_chan_Win(Chanel& chanel , Chanel& kernel , Matrix& result)
 
 	for (int chan = 0 ; chan < kernels ; ++chan)
 	{
-		Matrix res_per_Win = GgGt(kernel[chan]);
 		Matrix res_per(result.get_num_str() , result.get_num_col());
+		Matrix res_per_Win(4 , 4);
+		Matrix block_per(4 , 4);
+		Matrix res_Win(2 , 2);
+
+		GgGt(kernel[chan] , res_per_Win);
+		
 		for (int i = 0 ; i < chanel_h_Win ; ++i)
 			for (int j = 0 ; j < chanel_w_Win ; ++j)
 			{
@@ -55,14 +60,14 @@ void make_chan_Win(Chanel& chanel , Chanel& kernel , Matrix& result)
 				Matrix for_Win(chanel[chan] , 4 , 4 , i * 2 , j * 2);
 
 				//Win_formule
-				for_Win = BtdB(for_Win);
-				logic_product(for_Win , res_per_Win , for_Win);
-				for_Win =  AresAt(for_Win);
+				BtdB(for_Win , block_per);
+				logic_product(block_per , res_per_Win , block_per);
+				AresAt(block_per , res_Win);
 
-				res_per[i * 2 + 0][j * 2 + 0] = for_Win[0][0];
-				res_per[i * 2 + 0][j * 2 + 1] = for_Win[0][1];
-				res_per[i * 2 + 1][j * 2 + 0] = for_Win[1][0];
-				res_per[i * 2 + 1][j * 2 + 1] = for_Win[1][1];
+				res_per[i * 2 + 0][j * 2 + 0] = res_Win[0][0];
+				res_per[i * 2 + 0][j * 2 + 1] = res_Win[0][1];
+				res_per[i * 2 + 1][j * 2 + 0] = res_Win[1][0];
+				res_per[i * 2 + 1][j * 2 + 1] = res_Win[1][1];
 			}
 
 		//if for Tensor with odd parameters
@@ -89,9 +94,8 @@ void make_chan_Win(Chanel& chanel , Chanel& kernel , Matrix& result)
 	}
 }
 
-Matrix BtdB(Matrix& block)
+void BtdB(Matrix& block , Matrix& res)
 {
-	Matrix res(4 , 4);
 	res[0][0] = (block[0][0] - block[2][0]) - (block[0][2] - block[2][2]);
 	res[0][1] = (block[0][1] - block[2][1]) + (block[0][2] - block[2][2]);
 	res[0][2] = (block[0][2] - block[2][2]) - (block[0][1] - block[2][1]);
@@ -111,13 +115,10 @@ Matrix BtdB(Matrix& block)
 	res[3][1] = (block[1][1] - block[3][1]) + (block[1][2] - block[3][2]);
 	res[3][2] = (block[1][2] - block[3][2]) - (block[1][1] - block[3][1]);
 	res[3][3] = (block[1][1] - block[3][1]) - (block[1][3] - block[3][3]);
-
-	return res;
 }
 
-Matrix GgGt(Matrix& kernel)
+void GgGt(Matrix& kernel , Matrix& res)
 {
-	Matrix res(4 , 4);
 	res[0][0] = kernel[0][0];
 	res[0][1] = (kernel[0][0] + kernel[0][2] + kernel[0][1]) / 2;
 	res[0][2] = (kernel[0][0] + kernel[0][2] - kernel[0][1]) / 2;
@@ -137,13 +138,10 @@ Matrix GgGt(Matrix& kernel)
 	res[3][1] = (kernel[2][0] + kernel[2][2] + kernel[2][1]) / 2;
 	res[3][2] = (kernel[2][0] + kernel[2][2] - kernel[2][1]) / 2;
 	res[3][3] = kernel[2][2];
-
-	return res;
 }
 
-Matrix AresAt(Matrix& res)
+void AresAt(Matrix& res , Matrix& result)
 {
-	Matrix result(2 , 2);
 	float* per = new float[8];
 
 	per[0] = res[0][0] + res[0][1] + res[0][2];
@@ -161,6 +159,4 @@ Matrix AresAt(Matrix& res)
 	result[1][1] = per[3] - per[5] - per[7];
 
 	delete[] per;
-
-	return result;
 }
