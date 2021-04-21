@@ -210,8 +210,13 @@ void logic_product(Matrix& lhs , Matrix& rhs , Matrix& res)
 	assert(lhs.get_num_str() == rhs.get_num_str());
 
 	for (int i = 0 ; i < lhs.get_num_str() ; ++i)
+	{
 		for (int j = 0 ; j < lhs.get_num_col() ; ++j)
+		{
+
 			res[i][j] = lhs[i][j] * rhs[i][j];
+		}
+	}
 }
 
 void Matrix_product(const Matrix& lhs , const Matrix& rhs , Matrix& result)

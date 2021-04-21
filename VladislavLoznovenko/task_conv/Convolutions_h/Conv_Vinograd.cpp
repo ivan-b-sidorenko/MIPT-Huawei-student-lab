@@ -19,7 +19,7 @@ std::vector<Matrix> Win_mrx()
 	return res;
 }
 
-Tensor4 convolution_layer_Win(Tensor4& for_conv , Tensor4& filter , std::vector<Matrix>& convert)
+Tensor4 convolution_layer_Win(Tensor4& for_conv , Tensor4& filter)
 {
 	int new_h = for_conv.get_high() - filter.get_high() + 1;
 	int new_w = for_conv.get_width() - filter.get_width() + 1;
@@ -27,35 +27,50 @@ Tensor4 convolution_layer_Win(Tensor4& for_conv , Tensor4& filter , std::vector<
 	Tensor4 result(for_conv.get_num_butch() , filter.get_num_butch() , new_h , new_w);
 
 	for (int butch = 0 ; butch < for_conv.get_num_butch() ; ++butch)
-		treatment_Win(for_conv[butch] , filter , result[butch] , convert);
+		treatment_Win(for_conv[butch] , filter , result[butch]);
 	
 	return result;		
 }
 
-void treatment_Win(Chanel& chanel , Tensor4& kernels , Chanel& result , std::vector<Matrix>& convert)
+void treatment_Win(Chanel& chanel , Tensor4& kernels , Chanel& result)
 {
 	for (int ker_b = 0 ; ker_b < kernels.get_num_butch() ; ++ker_b)
-		make_chan_Win(chanel , kernels[ker_b] , result[ker_b] , convert);
+		make_chan_Win(chanel , kernels[ker_b] , result[ker_b]);
 }
 
-void make_chan_Win(Chanel& chanel , Chanel& kernel , Matrix& result , std::vector<Matrix>& convert)
+void make_chan_Win(Chanel& chanel , Chanel& kernel , Matrix& result)
 {
-	for (int chan = 0 ; chan < kernel.get_num_mrx() ; ++chan)
-	{
+	int kernels = kernel.get_num_mrx();
+	int chanel_h_Win = (chanel.get_high() - 2) / 2;
+	int chanel_w_Win = (chanel.get_width() - 2) / 2;
 
-		Matrix res_per(result.get_num_str() , result.get_num_col());
-		for (int i = 0 ; i < (chanel.get_high() - 2) / 2 ; ++i)
-			for (int j = 0 ; j < (chanel.get_width() - 2) / 2 ; ++j)
+	Matrix res_per(result.get_num_str() , result.get_num_col());
+	Matrix res_per_Win(4 , 4);
+	Matrix block_per(4 , 4);
+	Matrix res_Win(2 , 2);
+
+	for (int chan = 0 ; chan < kernels ; ++chan)
+	{
+		GgGt(kernel[chan] , res_per_Win);
+
+		for (int i = 0 ; i < chanel_h_Win ; ++i)
+			for (int j = 0 ; j < chanel_w_Win ; ++j)
 			{
 				//Take matrix 4x4 and use formule for Winograd
 				Matrix for_Win(chanel[chan] , 4 , 4 , i * 2 , j * 2);
-				Win_formule(for_Win , kernel[chan] , convert);
-				for (int i_ = 0 ; i_ < 2 ; ++i_)
-					for (int j_ = 0 ; j_ < 2 ; ++j_)
-						res_per[i * 2 + i_][j * 2 + j_] = for_Win[i_][j_];
+
+				//Win_formule
+				BtdB(for_Win , block_per);
+				logic_product(block_per , res_per_Win , block_per);
+				AresAt(block_per , res_Win);
+
+				res_per[i * 2 + 0][j * 2 + 0] = res_Win[0][0];
+				res_per[i * 2 + 0][j * 2 + 1] = res_Win[0][1];
+				res_per[i * 2 + 1][j * 2 + 0] = res_Win[1][0];
+				res_per[i * 2 + 1][j * 2 + 1] = res_Win[1][1];
 			}
 
-		//ifы for Tensor with odd parameters
+		//if for Tensor with odd parameters
 		if ((chanel.get_high() % 2) != 0)
 		{
 			for (int i = res_per.get_num_str() - 1 ; i < res_per.get_num_str() ; ++i)
@@ -79,13 +94,69 @@ void make_chan_Win(Chanel& chanel , Chanel& kernel , Matrix& result , std::vecto
 	}
 }
 
-void Win_formule(Matrix& block , Matrix kernel , std::vector<Matrix>& convert)
+void BtdB(Matrix& block , Matrix& res)
 {
-	kernel = Matrix_product_fast(Matrix_product_fast(convert[G] , kernel) , convert[GT]);
-	
-	block = Matrix_product_fast(Matrix_product_fast(convert[BT] , block) , convert[B]);
+	res[0][0] = (block[0][0] - block[2][0]) - (block[0][2] - block[2][2]);
+	res[0][1] = (block[0][1] - block[2][1]) + (block[0][2] - block[2][2]);
+	res[0][2] = (block[0][2] - block[2][2]) - (block[0][1] - block[2][1]);
+	res[0][3] = (block[0][1] - block[2][1]) - (block[0][3] - block[2][3]);
 
-	logic_product(kernel , block , block);
+	res[1][0] = (block[1][0] + block[2][0]) - (block[1][2] + block[2][2]);
+	res[1][1] = (block[1][1] + block[2][1]) + (block[1][2] + block[2][2]);
+	res[1][2] = (block[1][2] + block[2][2]) - (block[1][1] + block[2][1]);
+	res[1][3] = (block[1][1] + block[2][1]) - (block[1][3] + block[2][3]);
 
-	block = Matrix_product_fast(Matrix_product_fast(convert[AT] , block) , convert[A]);
+	res[2][0] = (block[2][0] - block[1][0]) - (block[2][2] - block[1][2]);
+	res[2][1] = (block[2][1] - block[1][1]) + (block[2][2] - block[1][2]);
+	res[2][2] = (block[2][2] - block[1][2]) - (block[2][1] - block[1][1]);
+	res[2][3] = (block[2][1] - block[1][1]) - (block[2][3] - block[1][3]);
+
+	res[3][0] = (block[1][0] - block[3][0]) - (block[1][2] - block[3][2]);
+	res[3][1] = (block[1][1] - block[3][1]) + (block[1][2] - block[3][2]);
+	res[3][2] = (block[1][2] - block[3][2]) - (block[1][1] - block[3][1]);
+	res[3][3] = (block[1][1] - block[3][1]) - (block[1][3] - block[3][3]);
+}
+
+void GgGt(Matrix& kernel , Matrix& res)
+{
+	res[0][0] = kernel[0][0];
+	res[0][1] = (kernel[0][0] + kernel[0][2] + kernel[0][1]) / 2;
+	res[0][2] = (kernel[0][0] + kernel[0][2] - kernel[0][1]) / 2;
+	res[0][3] = kernel[0][2];
+
+	res[1][0] = (kernel[0][0] + kernel[2][0] + kernel[1][0]) / 2;
+	res[1][1] = ((kernel[0][0] + kernel[2][0] + kernel[1][0]) + (kernel[0][2] + kernel[2][2] + kernel[1][2]) + (kernel[0][1] + kernel[2][1] + kernel[1][1])) / 4;
+	res[1][2] = ((kernel[0][0] + kernel[2][0] + kernel[1][0]) + (kernel[0][2] + kernel[2][2] + kernel[1][2]) - (kernel[0][1] + kernel[2][1] + kernel[1][1])) / 4;
+	res[1][3] = (kernel[0][2] + kernel[2][2] + kernel[1][2]) / 2;
+
+	res[2][0] = (kernel[0][0] + kernel[2][0] - kernel[1][0]) / 2;
+	res[2][1] = ((kernel[0][0] + kernel[2][0] - kernel[1][0]) + (kernel[0][2] + kernel[2][2] - kernel[1][2]) + (kernel[0][1] + kernel[2][1] - kernel[1][1])) / 4;
+	res[2][2] = ((kernel[0][0] + kernel[2][0] - kernel[1][0]) + (kernel[0][2] + kernel[2][2] - kernel[1][2]) - (kernel[0][1] + kernel[2][1] - kernel[1][1])) / 4;;
+	res[2][3] = (kernel[0][2] + kernel[2][2] - kernel[1][2]) / 2;
+
+	res[3][0] = kernel[2][0];
+	res[3][1] = (kernel[2][0] + kernel[2][2] + kernel[2][1]) / 2;
+	res[3][2] = (kernel[2][0] + kernel[2][2] - kernel[2][1]) / 2;
+	res[3][3] = kernel[2][2];
+}
+
+void AresAt(Matrix& res , Matrix& result)
+{
+	float* per = new float[8];
+
+	per[0] = res[0][0] + res[0][1] + res[0][2];
+	per[1] = res[0][1] - res[0][2] - res[0][3];
+	per[2] = res[1][0] + res[1][1] + res[1][2];
+	per[3] = res[1][1] - res[1][2] - res[1][3];
+	per[4] = res[2][0] + res[2][1] + res[2][2];
+	per[5] = res[2][1] - res[2][2] - res[2][3];
+	per[6] = res[3][0] + res[3][1] + res[3][2];
+	per[7] = res[3][1] - res[3][2] - res[3][3];
+
+	result[0][0] = per[0] + per[2] + per[4];
+	result[0][1] = per[1] + per[3] + per[5];
+	result[1][0] = per[2] - per[4] - per[6];
+	result[1][1] = per[3] - per[5] - per[7];
+
+	delete[] per;
 }

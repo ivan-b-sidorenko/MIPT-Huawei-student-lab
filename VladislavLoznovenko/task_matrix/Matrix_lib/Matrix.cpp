@@ -36,7 +36,7 @@ Matrix::Matrix(const Matrix& rhs)
 	mrx = new int*[num_str];
 
 	for (int i = 0 ; i < num_str ; ++i)
-		mrx[i] = new int[num_str];
+		mrx[i] = new int[num_col];
 
 	for (int i = 0 ; i < num_str ; i++)
 		for (int j = 0 ; j < num_col ; j++)
@@ -73,7 +73,7 @@ Matrix& Matrix::operator=(const Matrix& rhs)
 		mrx = new int*[rhs.get_num_str()];
 
 		for (int i = 0 ; i < rhs.get_num_col() ; ++i)
-			mrx[i] = new int[rhs.get_num_str()];
+			mrx[i] = new int[rhs.get_num_col()];
 
 		num_col = rhs.get_num_col();
 		num_str = rhs.get_num_str();

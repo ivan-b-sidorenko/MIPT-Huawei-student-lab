@@ -16,9 +16,8 @@ int main()
 	uint64_t duration_WIN = 0;
 	my_time::Timer clock;
 
-	Tensor4 test(1 , 3 , 100 , 100 , 0);
-	Tensor4 filter(25 , 3 , 3 , 3 , 0);
-	std::vector<Matrix> Win = Win_mrx();
+	Tensor4 test(1 , 3 , 300 , 300 , 0);
+	Tensor4 filter(15 , 3 , 3 , 3 , 0);
 
 	for (int i = 0 ; i < 5 ; ++i)
 	{
@@ -36,13 +35,16 @@ int main()
 		duration_GEMM += clock.get_mls();
 
 		clock.restart();
-		Tensor4 res_4 = convolution_layer_Win(test , filter , Win);
+		Tensor4 res_4 = convolution_layer_Win(test , filter);
 		duration_WIN += clock.get_mls();
 
 		assert(res_1 == res_2);
 		assert(res_1 == res_3);
 		assert(res_1 == res_4);
 	}
+
+	//std::cout << res_1 << std::endl;
+	//std::cout << res_4;
 
 	std::cout << "Normal conv - " << duration_normal / 5 << " - milliseconds" << std::endl;
 	std::cout << "Fast conv   - " << duration_fast / 5 << " - milliseconds" << std::endl;
